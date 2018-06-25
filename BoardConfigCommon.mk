@@ -49,6 +49,9 @@ TARGET_KRAIT_BIONIC_PLDSIZE          := 64
 QCOM_BOARD_PLATFORMS                    := msm8960
 TARGET_BOARD_PLATFORM                   := msm8960
 
+# Speed profile services and wifi-service to reduce RAM and storage.
+PRODUCT_SYSTEM_SERVER_COMPILER_FILTER := speed-profile
+
 # Audio
 USE_CUSTOM_AUDIO_POLICY := 1
 AUDIO_FEATURE_ENABLED_PROXY_DEVICE      := true
