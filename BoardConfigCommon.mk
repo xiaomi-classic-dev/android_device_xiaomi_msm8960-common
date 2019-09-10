@@ -50,6 +50,7 @@ QCOM_BOARD_PLATFORMS                    := msm8960
 TARGET_BOARD_PLATFORM                   := msm8960
 
 # Audio
+USE_XML_AUDIO_POLICY_CONF := 1
 AUDIO_FEATURE_ENABLED_PROXY_DEVICE      := true
 BOARD_USES_ALSA_AUDIO                   := true
 BOARD_HAVE_CSD_FAST_CALL_SWITCH         := true
