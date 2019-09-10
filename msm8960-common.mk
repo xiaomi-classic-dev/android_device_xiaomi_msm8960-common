@@ -23,9 +23,7 @@ LOCAL_PATH := device/xiaomi/msm8960-common
 
 # Overlay
 DEVICE_PACKAGE_OVERLAYS += \
-    $(LOCAL_PATH)/overlay \
-    $(LOCAL_PATH)/overlay-mokee
-
+    $(LOCAL_PATH)/overlay
 PRODUCT_ENFORCE_RRO_TARGETS := \
     framework-res
 
@@ -267,10 +265,6 @@ PRODUCT_COPY_FILES += \
 # Thermal HAL
 PRODUCT_PACKAGES += \
     android.hardware.thermal@1.0-impl
-
-# Trust HAL
-PRODUCT_PACKAGES += \
-    vendor.mokee.trust@1.0-service
 
 # USB HAL
 PRODUCT_PACKAGES += \
