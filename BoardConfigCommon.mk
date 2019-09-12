@@ -192,9 +192,6 @@ BOARD_HAS_NO_SELECT_BUTTON       := true
 # Remove secdiscard command
 TARGET_REMOVE_SECDISCARD_COMMAND := true
 
-# Sepolicy
-include device/qcom/sepolicy-legacy/sepolicy.mk
-
 # Security patch level
 VENDOR_SECURITY_PATCH := 2016-01-01
 
