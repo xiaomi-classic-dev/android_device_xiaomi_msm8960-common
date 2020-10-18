@@ -297,9 +297,5 @@ PRODUCT_PACKAGES += \
     wpa_supplicant \
     wpa_supplicant.conf
 
-# XiaomiParts
-PRODUCT_PACKAGES += \
-    XiaomiParts
-
 # call the proprietary setup
 $(call inherit-product, vendor/xiaomi/msm8960-common/msm8960-common-vendor.mk)
