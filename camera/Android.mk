@@ -123,6 +123,7 @@ ifeq ($(USE_DEVICE_SPECIFIC_CAMERA),true)
       else
         LOCAL_SHARED_LIBRARIES+= libdl
       endif
+      LOCAL_HEADER_LIBRARIES += libmedia_headers
 
       LOCAL_CFLAGS += -include bionic/libc/include/sys/socket.h
 

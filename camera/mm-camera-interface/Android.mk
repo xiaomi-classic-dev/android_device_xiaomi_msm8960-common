@@ -14,9 +14,6 @@ MM_CAM_FILES:= \
         mm_omx_jpeg_encoder.c
 
 LOCAL_CFLAGS+= -D_ANDROID_
-LOCAL_COPY_HEADERS_TO := mm-camera-interface
-LOCAL_COPY_HEADERS += mm_camera_interface2.h
-LOCAL_COPY_HEADERS += mm_omx_jpeg_encoder.h
 
 LOCAL_C_INCLUDES+= $(LOCAL_PATH)/..
 LOCAL_C_INCLUDES+= $(LOCAL_PATH)/../inc
@@ -35,6 +32,7 @@ LOCAL_SRC_FILES := $(MM_CAM_FILES)
 LOCAL_PROPRIETARY_MODULE := true
 LOCAL_MODULE           := libmmcamera_interface2
 LOCAL_SHARED_LIBRARIES := libdl libcutils liblog
+LOCAL_HEADER_LIBRARIES += camera_common_headers
 LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_SHARED_LIBRARY)
