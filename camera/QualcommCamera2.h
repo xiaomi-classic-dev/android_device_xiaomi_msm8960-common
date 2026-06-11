@@ -41,6 +41,10 @@ extern "C" {
 
   int camera_device_open(const struct hw_module_t* module, const char* id,
           struct hw_device_t** device);
+  int camera_device_open_legacy(const struct hw_module_t* module, const char* id,
+          struct hw_device_t** device);
+  int open_legacy_camera_device(const struct hw_module_t* module, const char* id,
+          uint32_t halVersion, struct hw_device_t** device);
 
   hw_device_t * open_camera_device(int cameraId);
 
@@ -105,4 +109,3 @@ namespace android {
 } //extern "C"
 
 #endif
-

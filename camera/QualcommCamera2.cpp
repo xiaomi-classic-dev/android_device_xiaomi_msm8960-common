@@ -39,6 +39,7 @@
 #include "QCameraHAL.h"
 /* include QCamera Hardware Interface Header*/
 #include "QualcommCamera2.h"
+#include "Camera3Wrapper.h"
 //#include "QualcommCameraHardware.h"
 //#include <camera/CameraHardwareInterface.h>
 
@@ -61,8 +62,8 @@ static hw_module_methods_t camera_module_methods = {
 
 static hw_module_t camera_common  = {
   .tag = HARDWARE_MODULE_TAG,
-  .version_major = 0,
-  .version_minor = 01,
+  .module_api_version = CAMERA_MODULE_API_VERSION_2_4,
+  .hal_api_version = HARDWARE_HAL_API_VERSION,
   .id = CAMERA_HARDWARE_MODULE_ID,
   .name = "Qcamera",
   .author ="Qcom",
@@ -74,6 +75,11 @@ camera_module_t HAL_MODULE_INFO_SYM = {
   .common = camera_common,
   .get_number_of_cameras = get_number_of_cameras,
   .get_camera_info = get_camera_info,
+  .set_callbacks = NULL,
+  .get_vendor_tag_ops = NULL,
+  .open_legacy = open_legacy_camera_device,
+  .set_torch_mode = NULL,
+  .init = NULL,
 };
 
 camera_device_ops_t camera_ops = {
@@ -168,6 +174,12 @@ extern "C" int get_camera_info(int camera_id, struct camera_info *info)
             rc = 0;
             info->facing = camInfo.facing;
             info->orientation = camInfo.orientation;
+            info->device_version = CAMERA_DEVICE_API_VERSION_3_2;
+            info->static_camera_characteristics = NULL;
+            info->resource_cost = 100;
+            info->conflicting_devices = NULL;
+            info->conflicting_devices_length = 0;
+            rc = camera3_get_camera_info(camera_id, info);
         }
     }
     ALOGV("Q%s: X", __func__);
@@ -179,6 +191,23 @@ static unsigned int QCameraSession = 0;
 
 /* HAL should return NULL if it fails to open camera hardware. */
 extern "C" int  camera_device_open(
+  const struct hw_module_t* module, const char* id,
+          struct hw_device_t** hw_device)
+{
+    return camera3_device_open(module, id, hw_device);
+}
+
+extern "C" int open_legacy_camera_device(
+  const struct hw_module_t* module, const char* id,
+          uint32_t halVersion, struct hw_device_t** hw_device)
+{
+    if (halVersion != CAMERA_DEVICE_API_VERSION_1_0)
+        return -EOPNOTSUPP;
+
+    return camera_device_open_legacy(module, id, hw_device);
+}
+
+extern "C" int  camera_device_open_legacy(
   const struct hw_module_t* module, const char* id,
           struct hw_device_t** hw_device)
 {
