@@ -645,6 +645,9 @@ service qcamerasvr /vendor/bin/mm-qcamera-daemon
     user camera
     group camera system inet input graphics bluetooth
 
+on property:init.svc.qcamerasvr=running
+    restart cameraserver
+
 service thermald /vendor/bin/thermald
    class main
    user root
