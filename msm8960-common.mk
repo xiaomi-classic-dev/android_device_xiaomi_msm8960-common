@@ -224,6 +224,7 @@ PRODUCT_PACKAGES += \
 
 # Perf
 PRODUCT_PACKAGES += \
+    libaudioclient_shim \
     libshims_atomic
 
 # Power
