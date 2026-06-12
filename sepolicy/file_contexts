@@ -2,3 +2,6 @@
 /firmware(/.*)?          u:object_r:firmware_file:s0
 /persist(/.*)?          u:object_r:firmware_file:s0
 /tombstones(/.*)?          u:object_r:firmware_file:s0
+
+# GPU
+/dev/kgsl.*             u:object_r:gpu_device:s0
