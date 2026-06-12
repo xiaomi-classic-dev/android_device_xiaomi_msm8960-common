@@ -104,6 +104,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 # Media
 PRODUCT_PROPERTY_OVERRIDES += \
+    debug.stagefright.ccodec=0 \
     media.stagefright.use-awesome=true
 
 PRODUCT_PROPERTY_OVERRIDES += \
