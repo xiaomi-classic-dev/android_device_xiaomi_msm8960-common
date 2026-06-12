@@ -5,10 +5,16 @@ on boot
     chown system system /sys/class/leds/red/brightness
     chown system system /sys/class/leds/green/brightness
     chown system system /sys/class/leds/blue/brightness
+    chown system system /sys/class/leds/red/trigger
+    chown system system /sys/class/leds/green/trigger
+    chown system system /sys/class/leds/blue/trigger
 
     chmod 0660 /sys/class/leds/red/brightness
     chmod 0660 /sys/class/leds/green/brightness
     chmod 0660 /sys/class/leds/blue/brightness
+    chmod 0660 /sys/class/leds/red/trigger
+    chmod 0660 /sys/class/leds/green/trigger
+    chmod 0660 /sys/class/leds/blue/trigger
 
 service vendor.light-hal-2-0 /vendor/bin/hw/android.hardware.light@2.0-service.msm8960
     interface android.hardware.light@2.0::ILight default
