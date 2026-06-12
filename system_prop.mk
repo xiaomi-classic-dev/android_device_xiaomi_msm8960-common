@@ -110,6 +110,10 @@ PRODUCT_PROPERTY_OVERRIDES += \
 PRODUCT_PROPERTY_OVERRIDES += \
     camera2.portability.force_api=1
 
+# Charger
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.charger.disable_init_blank=true
+
 # Maintainer
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.mk.maintainer=guaiyihu
