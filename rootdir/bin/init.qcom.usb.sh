@@ -96,7 +96,7 @@ case "$usb_config" in
                          if [ -z "$build_type" -o "$build_type" = "user" ]; then
                              setprop persist.sys.usb.config mtp
                          else
-                             setprop persist.sys.usb.config mtp,adb
+                             setprop persist.sys.usb.config adb
                          fi
                     ;;
                     "sglte")
@@ -112,7 +112,7 @@ case "$usb_config" in
                          if [ -z "$build_type" -o "$build_type" = "user" ]; then
                              setprop persist.sys.usb.config mtp
                          else
-                             setprop persist.sys.usb.config mtp,adb
+                             setprop persist.sys.usb.config adb
                          fi
                     ;;
                 esac
