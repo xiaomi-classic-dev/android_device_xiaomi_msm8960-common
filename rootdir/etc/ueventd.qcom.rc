@@ -109,7 +109,7 @@
 /dev/msm_preproc_ctl      0660   system     audio
 /dev/msm_rtac             0660   system     audio
 /dev/msm_voicememo        0660   system     audio
-/dev/radio0               0640   fm_radio   fm_radio
+/dev/radio0               0640   system     radio
 /dev/smd3                 0660   bluetooth  bluetooth
 /dev/smd2                 0660   bluetooth  bluetooth
 /dev/ttyHSL1              0660   system     system
@@ -277,4 +277,4 @@
 /sys/devices/system/cpu/cpu*    cpufreq/thermal_cap_freq    0664    system    system
 /sys/devices/system/cpu/cpu*    cpufreq/scaling_max_freq    0664    system    system
 /sys/devices/system/cpu/cpu*    cpufreq/scaling_min_freq    0664    system    system
-/sys/devices/system/cpu/nrcpus                              0664    system    system
+/sys/devices/system/cpu         nrcpus                      0664    system    system
