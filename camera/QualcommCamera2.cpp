@@ -61,8 +61,8 @@ static hw_module_methods_t camera_module_methods = {
 
 static hw_module_t camera_common  = {
   .tag = HARDWARE_MODULE_TAG,
-  .version_major = 0,
-  .version_minor = 01,
+  .module_api_version = CAMERA_MODULE_API_VERSION_1_0,
+  .hal_api_version = HARDWARE_HAL_API_VERSION,
   .id = CAMERA_HARDWARE_MODULE_ID,
   .name = "Qcamera",
   .author ="Qcom",
@@ -162,6 +162,7 @@ extern "C" int get_camera_info(int camera_id, struct camera_info *info)
     ALOGV("Q%s: E", __func__);
     if(info) {
         struct CameraInfo camInfo;
+        memset(info, 0, sizeof(*info));
         memset(&camInfo, -1, sizeof (struct CameraInfo));
         android::HAL_getCameraInfo(camera_id, &camInfo);
         if (camInfo.facing >= 0) {
@@ -212,6 +213,9 @@ extern "C" int  camera_device_open(
             if (camHal->hardware && camHal->hardware->isCameraReady()) {
                 camHal->cameraId = cameraId;
                 device = &camHal->hw_dev;
+                device->common.tag = HARDWARE_DEVICE_TAG;
+                device->common.version = CAMERA_DEVICE_API_VERSION_1_0;
+                device->common.module = (hw_module_t *)module;
                 device->common.close = close_camera_device;
                 device->ops = &camera_ops;
                 device->priv = (void *)camHal;
