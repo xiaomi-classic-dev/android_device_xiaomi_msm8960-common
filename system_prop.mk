@@ -30,6 +30,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.telephony.default_cdma_sub=0 \
     persist.omh.enabled=true \
     rild.libpath=/vendor/lib/libril-qc-qmi-1.so \
+    vendor.rild.libpath=/vendor/lib/libril-qc-qmi-1.so \
     rild.libargs=-d[SPACE]/dev/smd0
 
 PRODUCT_PROPERTY_OVERRIDES += \
