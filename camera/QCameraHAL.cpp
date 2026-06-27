@@ -89,7 +89,8 @@ extern "C" void HAL_getCameraInfo(int cameraId, struct CameraInfo* cameraInfo)
     mm_camera_t *mm_camer_obj = 0;
     ALOGV("%s: E", __func__);
 
-    if (!HAL_numOfCameras || HAL_numOfCameras < cameraId || !cameraInfo)
+    if (!HAL_numOfCameras || cameraId < 0 ||
+            cameraId >= HAL_numOfCameras || !cameraInfo)
         return;
     else
         mm_camer_obj = HAL_camerahandle[cameraId];
@@ -102,6 +103,17 @@ extern "C" void HAL_getCameraInfo(int cameraId, struct CameraInfo* cameraInfo)
             CAMERA_FACING_FRONT : CAMERA_FACING_BACK;
 
         cameraInfo->orientation = mm_camer_obj->camera_info.sensor_mount_angle;
+
+        if (HAL_numOfCameras == 2) {
+            if (cameraId == 0) {
+                cameraInfo->facing = CAMERA_FACING_BACK;
+                cameraInfo->orientation = 90;
+            } else if (cameraId == 1) {
+                cameraInfo->facing = CAMERA_FACING_FRONT;
+                cameraInfo->orientation = 270;
+            }
+        }
+
 #if 0
         // TODO: fix me
         /* We always supprot ZSL in our stack*/
