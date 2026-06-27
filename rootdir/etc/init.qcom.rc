@@ -650,6 +650,7 @@ service qcamerasvr /vendor/bin/mm-qcamera-daemon
     disabled
     user camera
     group camera system inet input graphics bluetooth
+    onrestart restart cameraserver
 
 service thermald /vendor/bin/thermald
    class main
