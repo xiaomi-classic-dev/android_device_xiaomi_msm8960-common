@@ -85,8 +85,8 @@ extern "C" {
 #define DEFAULT_FPS MAXIMUM_FPS
 
 //Default Picture Width
-#define DEFAULT_PICTURE_WIDTH  640
-#define DEFAULT_PICTURE_HEIGHT 480
+#define DEFAULT_PICTURE_WIDTH  1920
+#define DEFAULT_PICTURE_HEIGHT 1080
 
 //Default Video Width
 #define DEFAULT_VIDEO_WIDTH 1920
@@ -141,15 +141,15 @@ static struct camera_size_type zsl_picture_sizes[] = {
 static camera_size_type default_picture_sizes[] = {
   { 4208, 3120}, // 13MP
   { 4208, 2368}, // 10MP
-  { 3264, 2448}, // 8MP
   { 3264, 1836}, // Picture Size to match 1080p,720p AR
+  { 3264, 2448}, // 8MP
   { 3264, 2176}, // Picture Size to match 480p AR
   { 2592, 1944}, // 5MP
-  { 2048, 1536}, // 3MP QXGA
   { 1920, 1080}, // HD1080
+  { 2048, 1536}, // 3MP QXGA
   { 1600, 1200}, // 2MP UXGA
-  { 1280, 960}, // 1.3MP
   { 1280, 720},
+  { 1280, 960}, // 1.3MP
   { 720, 480},
   { 800, 480}, // WVGA
   { 640, 480}, // VGA
