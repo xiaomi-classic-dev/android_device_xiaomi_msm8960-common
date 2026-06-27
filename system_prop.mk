@@ -81,6 +81,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
     debug.sf.latch_unsignaled=1 \
     debug.egl.hw=1 \
     debug.composition.type=dyn \
+    debug.renderengine.backend=threaded \
     debug.hwui.use_buffer_age=false \
     debug.sf.enable_gl_backpressure=1 \
     persist.hwc.mdpcomp.enable=true \
@@ -114,6 +115,10 @@ PRODUCT_PROPERTY_OVERRIDES += \
 # Charger
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.charger.disable_init_blank=true
+
+# Kernel compatibility
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.kernel.ebpf.supported=false
 
 # Maintainer
 PRODUCT_PROPERTY_OVERRIDES += \
