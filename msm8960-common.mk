@@ -239,6 +239,10 @@ PRODUCT_PACKAGES += \
     libaudioclient_shim \
     libshims_atomic
 
+# Radio
+PRODUCT_PACKAGES += \
+    android.hardware.radio.config@1.0-service
+
 # Power
 PRODUCT_PACKAGES += \
     android.hardware.power-service-qti
