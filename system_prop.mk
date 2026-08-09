@@ -63,6 +63,9 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.bluetooth.remote.autoconnect=true \
     bluetooth.a2dp.sink.enabled=false
 
+PRODUCT_VENDOR_PROPERTIES += \
+    bluetooth.core.le.vendor_capabilities.enabled=false
+
 # transmitter isn't supported
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.fm.transmitter=false

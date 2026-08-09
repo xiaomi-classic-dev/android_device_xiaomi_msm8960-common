@@ -304,6 +304,7 @@ on post-fs-data
     chown system system /data/connectivity
 
     write /sys/module/wcnss_ssr_8960/parameters/enable_riva_ssr 1
+    setprop persist.sys.ssr.restart_level 3
     write /sys/devices/platform/wcnss_wlan.0/serial_number ${ro.serialno}
 
     # Create the directories used by DPM subsystem
