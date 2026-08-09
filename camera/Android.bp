@@ -3,19 +3,3 @@ cc_library_static {
     include_dirs: ["device/xiaomi/msm8960-common/include"],
     srcs: ["CameraParameters.cpp"],
 }
-
-cc_library_shared {
-    name: "libcamera_legacy_shim",
-    vendor: true,
-    compile_multilib: "32",
-    stl: "none",
-    srcs: ["CameraLegacyShim.c"],
-    shared_libs: [
-        "libdl",
-        "liblog",
-    ],
-    cflags: [
-        "-Wall",
-        "-Werror",
-    ],
-}

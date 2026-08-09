@@ -22,7 +22,7 @@ lib/libmmcamera_wavelet_lib.so:vendor/lib/libmmcamera_wavelet_lib.so
 lib/libmercury.so:vendor/lib/libmercury.so|199889a630a744aa2b75f8d09e38b1e9de2e2ef8
 lib/libmmjpeg.so:vendor/lib/libmmjpeg.so|2a16032fad9b43b72030c094590cd08aa668a9bb
 lib/libmmstillomx.so:vendor/lib/libmmstillomx.so
-lib/liboemcamera.so:vendor/lib/liboemcamera.so|eba19e1109e2ca330752772352b873c8907395b1
+lib/liboemcamera.so:vendor/lib/liboemcamera.so|86cb443c6438c16d9a9feefa0ac68c6157f0dfa3
 lib/libstlport.so:vendor/lib/libstlport.so|f881a16e0dcf95c49b15368f7c7a5f8ad7ed9f81
 
 # DRM

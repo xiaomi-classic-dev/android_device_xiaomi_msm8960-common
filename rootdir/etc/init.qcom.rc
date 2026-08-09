@@ -652,7 +652,6 @@ service qcamerasvr /vendor/bin/mm-qcamera-daemon
     disabled
     user camera
     group camera system inet input graphics bluetooth
-    setenv LD_PRELOAD /vendor/lib/libcamera_legacy_shim.so
     onrestart restart cameraserver
 
 service thermald /vendor/bin/thermald
