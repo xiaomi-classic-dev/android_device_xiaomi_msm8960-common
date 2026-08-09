@@ -57,6 +57,10 @@ on fs
     start hwservicemanager
 
 on late-fs
+    # Queue the default brightness before HWC opens the framebuffer. The
+    # kernel applies it only after the first completed display commit.
+    write /sys/class/leds/lcd-backlight/brightness 100
+
     # Start services for bootanim
     start vendor.configstore-hal
     start vendor.gralloc-2-0
