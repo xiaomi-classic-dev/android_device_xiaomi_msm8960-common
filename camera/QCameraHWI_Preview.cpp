@@ -1262,6 +1262,7 @@ status_t QCameraStream_preview::start()
     ALOGV("%s: E", __func__);
     status_t ret = NO_ERROR;
     cam_format_t previewFmt;
+    bool buffer_prepared = false;
     Mutex::Autolock lock(mStopCallbackLock);
 
     /* call start() in parent class to start the monitor thread*/
@@ -1287,6 +1288,7 @@ status_t QCameraStream_preview::start()
         ret = BAD_VALUE;
         goto error;
     }else {
+        buffer_prepared = true;
         ret = NO_ERROR;
     }
 
@@ -1327,6 +1329,11 @@ status_t QCameraStream_preview::start()
 
     if (MM_CAMERA_OK != ret) {
       ALOGE ("%s: preview streaming start err=%d\n", __func__, ret);
+      int stop_ret = cam_ops_action(mCameraId, false, MM_CAMERA_OPS_PREVIEW, 0);
+      if (stop_ret != MM_CAMERA_OK) {
+        ALOGE("%s: preview streaming stop after start failure err=%d\n",
+              __func__, stop_ret);
+      }
       ret = BAD_VALUE;
       goto error;
     }
@@ -1338,6 +1345,13 @@ status_t QCameraStream_preview::start()
     goto end;
 
 error:
+    if (buffer_prepared) {
+      int unprep_ret = cam_config_unprepare_buf(mCameraId, MM_CAMERA_CH_PREVIEW);
+      if (unprep_ret != MM_CAMERA_OK) {
+        ALOGE("%s: unprepare preview buf after start failure err=%d\n",
+              __func__, unprep_ret);
+      }
+    }
 
     if (!mHalCamCtrl->isNoDisplayMode())
       putBufferToSurface();

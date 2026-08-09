@@ -894,8 +894,11 @@ int32_t mm_camera_action_start(mm_camera_obj_t *my_obj,
     }
     CDBG("%s: ch=%d,op_mode=%d,opcode=%d\n", __func__, ch_type,
       my_obj->op_mode, opcode);
-    if(send_on_off_evt)
+    if (send_on_off_evt && rc == MM_CAMERA_OK)
       rc = mm_camera_send_ch_on_off_event(my_obj,ch_type,MM_CAMERA_CH_EVT_STREAMING_ON);
+    else if (send_on_off_evt)
+      CDBG_ERROR("%s: not sending STREAMING_ON after stream start failure rc=%d",
+          __func__, rc);
     return rc;
 }
 
