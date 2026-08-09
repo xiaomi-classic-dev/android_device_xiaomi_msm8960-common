@@ -1079,6 +1079,8 @@ status_t QCameraHardwareInterface::startPreview()
             retVal = startPreview2();
             if(retVal == NO_ERROR)
                 mPreviewState = QCAMERA_HAL_PREVIEW_STARTED;
+            else
+                mPreviewState = QCAMERA_HAL_PREVIEW_STOPPED;
         } else {
             ALOGV("%s:  received startPreview, but preview window = null", __func__);
         }

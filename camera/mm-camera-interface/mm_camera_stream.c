@@ -36,12 +36,28 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fcntl.h>
 #include <poll.h>
 #include <time.h>
+#include <cutils/properties.h>
 
 #include "mm_camera_interface2.h"
 #include "mm_camera.h"
 
 static void mm_camera_stream_util_set_state(mm_camera_stream_t *stream,
                          mm_camera_stream_state_type_t state);
+
+static void mm_camera_stream_recover_daemon(void)
+{
+    static int restart_requested;
+
+    if (!__sync_bool_compare_and_swap(&restart_requested, 0, 1))
+        return;
+
+    CDBG_ERROR("%s: restarting qcamerasvr after camera control timeout\n",
+        __func__);
+    if (property_set("ctl.restart", "qcamerasvr") < 0) {
+        CDBG_ERROR("%s: failed to restart qcamerasvr\n", __func__);
+        __sync_bool_compare_and_swap(&restart_requested, 1, 0);
+    }
+}
 
 int mm_camera_stream_init_q(mm_camera_frame_queue_t *q)
 {
@@ -798,8 +814,14 @@ static int32_t mm_camera_stream_fsm_reg(mm_camera_obj_t * my_obj,
                      __func__, stream->fd, stream->stream_type);
             rc = ioctl(stream->fd, VIDIOC_STREAMON, &buf_type);
             if (rc < 0) {
-                    CDBG_ERROR("%s: ioctl VIDIOC_STREAMON failed: rc=%d\n",
-                        __func__, rc);
+                    int saved_errno = errno;
+
+                    CDBG_ERROR("%s: ioctl VIDIOC_STREAMON failed: rc=%d, errno=%d\n",
+                        __func__, rc, saved_errno);
+                    ioctl(stream->fd, VIDIOC_STREAMOFF, &buf_type);
+                    stream->frame.qbuf = 0;
+                    if (saved_errno == ETIMEDOUT)
+                        mm_camera_stream_recover_daemon();
             }
             else
                 mm_camera_stream_util_set_state(stream, MM_CAMERA_STREAM_STATE_ACTIVE);
@@ -877,4 +899,3 @@ int32_t mm_camera_stream_fsm_fn_vtbl (mm_camera_obj_t * my_obj,
                  __func__, stream->fd, stream->stream_type, stream->state, evt);
     return mm_camera_stream_fsm_fn[stream->state] (my_obj, stream, evt, val);
 }
-
