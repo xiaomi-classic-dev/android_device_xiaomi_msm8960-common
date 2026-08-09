@@ -389,7 +389,7 @@ on post-fs-data
     chmod 2770 /dev/socket/mpdecision
 
 on charger
-    mount ext4 /dev/block/platform/msm_sdcc.1/by-name/system /system wait ro barrier=1
+    # first_stage_mount has already pivoted the system partition to /.
     # Enable Power modes and set the CPU Freq Sampling rates
     write /sys/module/rpm_resources/enable_low_power/L2_cache 1
     write /sys/module/rpm_resources/enable_low_power/pxo 1
@@ -416,6 +416,7 @@ on charger
     write /sys/devices/system/cpu/cpu2/online 0
     write /sys/devices/system/cpu/cpu3/online 0
     write /sys/class/leds/lcd-backlight/brightness 100
+    write /sys/class/leds/lm3530-backlight/brightness 100
     setprop sys.usb.config adb
     class_start charger
 
