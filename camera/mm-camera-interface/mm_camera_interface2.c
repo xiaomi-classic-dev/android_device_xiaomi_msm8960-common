@@ -36,10 +36,15 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fcntl.h>
 #include <stddef.h>
 #include <poll.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <linux/media.h>
 
 #include "mm_camera_interface2.h"
 #include "mm_camera.h"
+
+#define MM_CAMERA_MAX_MEDIA_DEVICES 16
 
 #define SET_PARM_BIT32(parm, parm_arr) \
     (parm_arr[parm/32] |= (1<<(parm%32)))
@@ -124,7 +129,7 @@ static uint8_t mm_camera_cfg_is_ch_supported (mm_camera_t * camera,
     return FALSE;
 }
 
-/* set a parm’s current value */
+/* set a parm's current value */
 static int32_t mm_camera_cfg_set_parm (mm_camera_t * camera,
                                        mm_camera_parm_type_t parm_type,
                                        void *p_value)
@@ -145,7 +150,7 @@ static int32_t mm_camera_cfg_set_parm (mm_camera_t * camera,
     return rc;
 }
 
-/* get a parm’s current value */
+/* get a parm's current value */
 static int32_t mm_camera_cfg_get_parm (mm_camera_t * camera,
                                        mm_camera_parm_type_t parm_type,
                                        void* p_value)
@@ -614,58 +619,47 @@ static mm_camera_jpeg_t mm_camera_jpeg =  {
 
 extern mm_camera_t * mm_camera_query (uint8_t *num_cameras)
 {
-    int i = 0, rc = MM_CAMERA_OK;
-    int dev_fd = 0;
+    int rc = MM_CAMERA_OK;
+    int dev_fd = -1;
     struct media_device_info mdev_info;
-    int num_media_devices = 0;
     if (!num_cameras)
       return NULL;
     /* lock the mutex */
     pthread_mutex_lock(&g_mutex);
     *num_cameras = 0;
-    while (1) {
+    for (int media_index = 0;
+         media_index < MM_CAMERA_MAX_MEDIA_DEVICES &&
+         *num_cameras < MSM_MAX_CAMERA_SENSORS;
+         media_index++) {
       char dev_name[32];
-      snprintf(dev_name, sizeof(dev_name), "/dev/media%d", num_media_devices);
+      snprintf(dev_name, sizeof(dev_name), "/dev/media%d", media_index);
       dev_fd = open(dev_name, O_RDWR | O_NONBLOCK);
       if (dev_fd < 0) {
-        CDBG("Done discovering media devices\n");
-        break;
-      }
-      num_media_devices++;
-      rc = ioctl(dev_fd, MEDIA_IOC_DEVICE_INFO, &mdev_info);
-      if (rc < 0) {
-        CDBG_ERROR("Error: ioctl media_dev failed: %s\n", strerror(errno));
-        close(dev_fd);
-        break;
+        continue;
       }
 
-      if(strncmp(mdev_info.model, QCAMERA_NAME, sizeof(mdev_info.model) != 0)) {
+      memset(&mdev_info, 0, sizeof(mdev_info));
+      rc = ioctl(dev_fd, MEDIA_IOC_DEVICE_INFO, &mdev_info);
+      if (rc < 0) {
+        CDBG_ERROR("Error querying %s: %s\n", dev_name, strerror(errno));
         close(dev_fd);
         continue;
       }
 
-      char * mdev_cfg;
-      int cam_type = 0, mount_angle = 0, info_index = 0;
-      mdev_cfg = strtok(mdev_info.serial, "-");
-      while(mdev_cfg != NULL) {
-          if(info_index == 0) {
-              if(strcmp(mdev_cfg, QCAMERA_NAME))
-                  break;
-          } else if(info_index == 1) {
-              mount_angle = atoi(mdev_cfg);
-          } else if(info_index == 2) {
-              cam_type = atoi(mdev_cfg);
-          }
-          mdev_cfg = strtok(NULL, "-");
-          info_index++;
+      if (strncmp(mdev_info.model, QCAMERA_NAME, sizeof(QCAMERA_NAME)) != 0) {
+        close(dev_fd);
+        continue;
       }
 
-      if(info_index == 0) {
-          close(dev_fd);
-          continue;
+      int cam_type = 0, mount_angle = 0;
+      if (sscanf(mdev_info.serial, QCAMERA_NAME "-%d-%d",
+                 &mount_angle, &cam_type) != 2) {
+        close(dev_fd);
+        continue;
       }
 
       int num_entities = 1;
+      int camera_entity_found = 0;
       while (1) {
         struct media_entity_desc entity;
         memset(&entity, 0, sizeof(entity));
@@ -677,10 +671,17 @@ extern mm_camera_t * mm_camera_query (uint8_t *num_cameras)
             break;
         }
         if(entity.type == MEDIA_ENT_T_DEVNODE_V4L && entity.group_id == QCAMERA_VNODE_GROUP_ID) {
-             strncpy(g_cam_ctrl.camera[*num_cameras].video_dev_name,
-                     entity.name, sizeof(entity.name));
+             snprintf(g_cam_ctrl.camera[*num_cameras].video_dev_name,
+                      sizeof(g_cam_ctrl.camera[*num_cameras].video_dev_name),
+                      "%s", entity.name);
+             camera_entity_found = 1;
              break;
         }
+      }
+
+      if (!camera_entity_found) {
+          close(dev_fd);
+          continue;
       }
 
       g_cam_ctrl.camera[*num_cameras].camera_info.camera_id = *num_cameras;
@@ -709,20 +710,15 @@ extern mm_camera_t * mm_camera_query (uint8_t *num_cameras)
         g_cam_ctrl.camera[*num_cameras].sensor_type);
 
       *num_cameras+=1;
-      if (dev_fd > 0) {
-          close(dev_fd);
-      }
+      close(dev_fd);
     }
-    *num_cameras = *num_cameras;
     g_cam_ctrl.num_cam = *num_cameras;
-end:
     /* unlock the mutex */
     pthread_mutex_unlock(&g_mutex);
     CDBG("%s: num_cameras=%d\n", __func__, g_cam_ctrl.num_cam);
-    if(rc == 0)
+    if (g_cam_ctrl.num_cam > 0)
         return &g_cam_ctrl.camera[0];
-    else
-        return NULL;
+    return NULL;
 }
 
 
@@ -763,7 +759,7 @@ uint8_t cam_config_is_ch_supported(
 
 }
 
-/* set a parm’s current value */
+/* set a parm's current value */
 int32_t cam_config_set_parm(
   int cam_id,
   mm_camera_parm_type_t parm_type,
@@ -777,7 +773,7 @@ int32_t cam_config_set_parm(
   return rc;
 }
 
-/* get a parm’s current value */
+/* get a parm's current value */
 int32_t cam_config_get_parm(
   int cam_id,
   mm_camera_parm_type_t parm_type,
@@ -1024,4 +1020,3 @@ int32_t cam_jpeg_encode(int cam_id, uint8_t start,
   }
   return rc;
 }
-
