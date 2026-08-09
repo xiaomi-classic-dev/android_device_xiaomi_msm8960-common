@@ -83,9 +83,7 @@ PRODUCT_PACKAGES += \
     android.hardware.audio.effect@4.0-impl \
     android.hardware.broadcastradio@1.0-impl \
     android.hardware.soundtrigger@2.0-impl \
-    audio_policy.msm8960 \
     audio.primary.msm8960 \
-    audio.a2dp.default \
     audio.r_submix.default \
     audio.usb.default \
     libaudio-resampler \
@@ -138,12 +136,10 @@ PRODUCT_PACKAGES += \
     libmemalloc \
     liboverlay \
     libqdutils \
-    libtilerenderer \
     hwcomposer.msm8960 \
     gralloc.msm8960 \
     copybit.msm8960 \
-    memtrack.msm8960 \
-    libemoji
+    memtrack.msm8960
 
 # Drm
 PRODUCT_PACKAGES += \
@@ -235,8 +231,6 @@ PRODUCT_PACKAGES += \
     libOmxVdec \
     libOmxVenc \
     libc2dcolorconvert \
-    libdashplayer \
-    libdivxdrmdecrypt \
     libmm-omxcore \
     libstagefrighthw
 
