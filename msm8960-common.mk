@@ -101,6 +101,7 @@ PRODUCT_PACKAGES += \
     camera.device@1.0-impl \
     Camera2 \
     camera.msm8960 \
+    libcamera_legacy_shim \
     libmmcamera_interface2
 
 PRODUCT_COPY_FILES += \
