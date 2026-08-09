@@ -154,6 +154,9 @@ BOARD_RAMDISK_USE_XZ                 := true
 TARGET_KERNEL_ARCH                   := arm
 TARGET_KERNEL_SOURCE                 := kernel/xiaomi/aries
 TARGET_KERNEL_CLANG_COMPILE          := false
+TARGET_KERNEL_ADDITIONAL_FLAGS      += HOSTCC="$(TARGET_KERNEL_CLANG_PATH)/bin/clang -B/usr/bin"
+TARGET_KERNEL_ADDITIONAL_FLAGS      += HOSTCXX="$(TARGET_KERNEL_CLANG_PATH)/bin/clang++ -B/usr/bin"
+TARGET_KERNEL_ADDITIONAL_FLAGS      += HOSTLDFLAGS="-L/usr/lib/x86_64-linux-gnu -L/usr/lib64"
 
 # Malloc
 MALLOC_SVELTE := true
