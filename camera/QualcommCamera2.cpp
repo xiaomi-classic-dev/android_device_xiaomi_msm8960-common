@@ -169,6 +169,9 @@ extern "C" int get_camera_info(int camera_id, struct camera_info *info)
             rc = 0;
             info->facing = camInfo.facing;
             info->orientation = camInfo.orientation;
+            info->device_version = CAMERA_DEVICE_API_VERSION_1_0;
+            ALOGI("%s: id=%d facing=%d orientation=%d",
+                  __func__, camera_id, info->facing, info->orientation);
         }
     }
     ALOGV("Q%s: X", __func__);

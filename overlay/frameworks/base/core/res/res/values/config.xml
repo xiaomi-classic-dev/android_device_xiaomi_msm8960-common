@@ -116,6 +116,9 @@
          device does not support multiple advertisement-->
     <integer translatable="false" name="config_bluetooth_max_advertisers">4</integer>
 
+    <!-- Camera HAL1 runs inside mediaserver on this legacy target. -->
+    <bool name="config_allowMediaUidForCameraServiceProxy">true</bool>
+
     <!-- If this is true, the screen will come on when you unplug usb/power/whatever. -->
     <bool name="config_unplugTurnsOnScreen">true</bool>
 

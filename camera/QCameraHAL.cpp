@@ -102,16 +102,20 @@ extern "C" void HAL_getCameraInfo(int cameraId, struct CameraInfo* cameraInfo)
             (FRONT_CAMERA == mm_camer_obj->camera_info.position)?
             CAMERA_FACING_FRONT : CAMERA_FACING_BACK;
 
-        cameraInfo->orientation = mm_camer_obj->camera_info.sensor_mount_angle;
-
-        if (HAL_numOfCameras == 2) {
-            if (cameraId == 0) {
-                cameraInfo->facing = CAMERA_FACING_BACK;
-                cameraInfo->orientation = 90;
-            } else if (cameraId == 1) {
-                cameraInfo->facing = CAMERA_FACING_FRONT;
-                cameraInfo->orientation = 270;
-            }
+        switch (mm_camer_obj->camera_info.sensor_mount_angle) {
+        case 0:
+        case 90:
+        case 180:
+        case 270:
+            cameraInfo->orientation =
+                mm_camer_obj->camera_info.sensor_mount_angle;
+            break;
+        default:
+            cameraInfo->orientation =
+                cameraInfo->facing == CAMERA_FACING_FRONT ? 270 : 90;
+            ALOGW("Invalid sensor mount angle %d for camera %d; using %d",
+                  mm_camer_obj->camera_info.sensor_mount_angle, cameraId,
+                  cameraInfo->orientation);
         }
 
 #if 0
