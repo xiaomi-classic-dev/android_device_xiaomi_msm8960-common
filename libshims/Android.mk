@@ -19,6 +19,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := atomic.cpp
 LOCAL_MODULE := libshims_atomic
 LOCAL_MODULE_TAGS := optional
+LOCAL_HEADER_LIBRARIES := libcutils_headers
 LOCAL_SHARED_LIBRARIES := liblog
 LOCAL_PROPRIETARY_MODULE := true
 include $(BUILD_SHARED_LIBRARY)
