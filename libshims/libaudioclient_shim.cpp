@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-#include <media/AudioSystem.h>
+#include <dlfcn.h>
+#include <stdint.h>
 
-extern "C" uintptr_t _ZN7android11AudioSystem16addErrorCallbackEPFviE(
-        android::audio_error_callback cb);
+using audio_error_callback = void (*)(int);
+using add_error_callback = uintptr_t (*)(audio_error_callback);
 
 extern "C" void _ZN7android11AudioSystem16setErrorCallbackEPFviE(
-        android::audio_error_callback cb) {
-    _ZN7android11AudioSystem16addErrorCallbackEPFviE(cb);
+        audio_error_callback cb) {
+    static auto addErrorCallback = reinterpret_cast<add_error_callback>(
+            dlsym(RTLD_DEFAULT, "_ZN7android11AudioSystem16addErrorCallbackEPFviE"));
+
+    if (addErrorCallback != nullptr) {
+        addErrorCallback(cb);
+    }
 }

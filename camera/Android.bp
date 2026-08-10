@@ -1,5 +1,6 @@
 cc_library_static {
     name: "camera_parameters_xiaomi_msm8960",
+    vendor_available: true,
     include_dirs: ["device/xiaomi/msm8960-common/include"],
     srcs: ["CameraParameters.cpp"],
 }
