@@ -1659,13 +1659,13 @@ void QualcommCameraHardware::initDefaultParameters()
         preview_size_values = create_sizes_str(
                 preview_sizes,  PREVIEW_SIZE_COUNT);
         mParameters.set(QCameraParameters::KEY_SUPPORTED_PREVIEW_SIZES,
-                            preview_size_values.string());
+                            preview_size_values.c_str());
 
         mParameters.set(QCameraParameters::KEY_SUPPORTED_VIDEO_SIZES,
-                            preview_size_values.string());
+                            preview_size_values.c_str());
 
         mParameters.set(QCameraParameters::KEY_SUPPORTED_PICTURE_SIZES,
-                            picture_size_values.string());
+                            picture_size_values.c_str());
         mParameters.set(QCameraParameters::KEY_VIDEO_SNAPSHOT_SUPPORTED,
                             "true");
         mParameters.set(QCameraParameters::KEY_SUPPORTED_FOCUS_MODES,
@@ -1790,7 +1790,7 @@ void QualcommCameraHardware::initDefaultParameters()
     //set video size
     if(( mCurrentTarget == TARGET_MSM7630 ) || (mCurrentTarget == TARGET_QSD8250) || (mCurrentTarget == TARGET_MSM8660)) {
        String8 vSize = create_sizes_str(preview_sizes, 1);
-       mParameters.set(QCameraParameters::KEY_VIDEO_SIZE, vSize.string());
+       mParameters.set(QCameraParameters::KEY_VIDEO_SIZE, vSize.c_str());
     }
     if(mIs3DModeOn){
        ALOGI("In initDefaultParameters - 3D mode on so set the default preview to 1280 x 720");
@@ -1806,7 +1806,7 @@ void QualcommCameraHardware::initDefaultParameters()
     if( mCfgControl.mm_camera_is_supported(CAMERA_PARM_FPS)){
         mParameters.set(
             QCameraParameters::KEY_SUPPORTED_PREVIEW_FRAME_RATES,
-            preview_frame_rate_values.string());
+            preview_frame_rate_values.c_str());
      } else {
         mParameters.setPreviewFrameRate(DEFAULT_FIXED_FPS_VALUE);
         mParameters.set(
@@ -1841,7 +1841,7 @@ void QualcommCameraHardware::initDefaultParameters()
 
     String8 valuesStr = create_sizes_str(jpeg_thumbnail_sizes, JPEG_THUMBNAIL_SIZE_COUNT);
     mParameters.set(QCameraParameters::KEY_SUPPORTED_JPEG_THUMBNAIL_SIZES,
-                valuesStr.string());
+                valuesStr.c_str());
 
     // Define CAMERA_SMOOTH_ZOOM in Android.mk file , to enable smoothzoom
 #ifdef CAMERA_SMOOTH_ZOOM
@@ -1888,25 +1888,25 @@ void QualcommCameraHardware::initDefaultParameters()
         preview_format_values = create_values_str(
             preview_formats1, sizeof(preview_formats1) / sizeof(str_map));
         mParameters.set(QCameraParameters::KEY_SUPPORTED_PREVIEW_FORMATS,
-                preview_format_values.string());
+                preview_format_values.c_str());
     } else {
         preview_format_values = create_values_str(
             preview_formats, sizeof(preview_formats) / sizeof(str_map));
         mParameters.set(QCameraParameters::KEY_SUPPORTED_PREVIEW_FORMATS,
-                preview_format_values.string());
+                preview_format_values.c_str());
     }
 
     frame_rate_mode_values = create_values_str(
             frame_rate_modes, sizeof(frame_rate_modes) / sizeof(str_map));
  if( mCfgControl.mm_camera_is_supported(CAMERA_PARM_FPS_MODE)){
         mParameters.set(QCameraParameters::KEY_SUPPORTED_PREVIEW_FRAME_RATE_MODES,
-                    frame_rate_mode_values.string());
+                    frame_rate_mode_values.c_str());
     }
 
     mParameters.set(QCameraParameters::KEY_SUPPORTED_PREVIEW_SIZES,
-                    preview_size_values.string());
+                    preview_size_values.c_str());
     mParameters.set(QCameraParameters::KEY_SUPPORTED_PICTURE_SIZES,
-                    picture_size_values.string());
+                    picture_size_values.c_str());
     mParameters.set(QCameraParameters::KEY_SUPPORTED_ANTIBANDING,
                     antibanding_values);
     mParameters.set(QCameraParameters::KEY_SUPPORTED_EFFECTS, effect_values);
@@ -1986,7 +1986,7 @@ void QualcommCameraHardware::initDefaultParameters()
         mParameters.set(QCameraParameters::KEY_VIDEO_HIGH_FRAME_RATE,
                     QCameraParameters::VIDEO_HFR_OFF);
         mParameters.set(QCameraParameters::KEY_SUPPORTED_HFR_SIZES,
-                    hfr_size_values.string());
+                    hfr_size_values.c_str());
         mParameters.set(QCameraParameters::KEY_SUPPORTED_VIDEO_HIGH_FRAME_RATE_MODES,
                     hfr_values);
     } else
@@ -2307,7 +2307,7 @@ status_t QualcommCameraHardware::dump(int fd,
              "and jpeg max size (%d)\n", mPreviewFrameSize, mRawSize,
              mJpegSize, mJpegMaxSize);
     result.append(buffer);
-    write(fd, result.string(), result.size());
+    write(fd, result.c_str(), result.size());
 
     // Dump internal objects.
     if (mPreviewHeap[0] != 0) {
@@ -8990,8 +8990,8 @@ status_t QualcommCameraHardware::updateFocusDistances(const char *focusmode)
         else
             snprintf(buffer, sizeof(buffer), ",%f", focusDistances.focus_distance[2]);
         str.append(buffer);
-        ALOGI("%s: setting KEY_FOCUS_DISTANCES as %s", __FUNCTION__, str.string());
-        mParameters.set(QCameraParameters::KEY_FOCUS_DISTANCES, str.string());
+        ALOGI("%s: setting KEY_FOCUS_DISTANCES as %s", __FUNCTION__, str.c_str());
+        mParameters.set(QCameraParameters::KEY_FOCUS_DISTANCES, str.c_str());
         return NO_ERROR;
     }
     ALOGE("%s: get CAMERA_PARM_FOCUS_DISTANCES failed!!!", __FUNCTION__);
@@ -9561,7 +9561,7 @@ status_t QualcommCameraHardware::MemPool::dump(int fd, const Vector<String16>& a
              "buffer size (%d), number of buffers (%d), frame size(%d)",
              mBufferSize, mNumBuffers, mFrameSize);
     result.append(buffer);
-    write(fd, result.string(), result.size());
+    write(fd, result.c_str(), result.size());
     return NO_ERROR;
 }
 
