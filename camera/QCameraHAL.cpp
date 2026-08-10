@@ -84,7 +84,7 @@ extern "C" int HAL_isIn3DMode()
     return HAL_currentCameraMode == CAMERA_MODE_3D;
 }
 
-extern "C" void HAL_getCameraInfo(int cameraId, struct CameraInfo* cameraInfo)
+extern "C" void HAL_getCameraInfo(int cameraId, struct camera_info* cameraInfo)
 {
     mm_camera_t *mm_camer_obj = 0;
     ALOGV("%s: E", __func__);
