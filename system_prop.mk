@@ -117,7 +117,11 @@ PRODUCT_PROPERTY_OVERRIDES += \
     media.stagefright.use-awesome=true
 
 PRODUCT_PROPERTY_OVERRIDES += \
-    camera2.portability.force_api=1
+    camera2.portability.force_api=1 \
+    persist.camera.hal3on1.use_hwcomposer=0 \
+    persist.camera.hal3on1.use_memfd=0 \
+    persist.camera.hal3on1.use_preview_window_stub=0 \
+    persist.camera.hal3on1.use_sysfs_torch=0
 
 # Charger
 PRODUCT_PROPERTY_OVERRIDES += \

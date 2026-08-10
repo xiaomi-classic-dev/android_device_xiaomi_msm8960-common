@@ -100,6 +100,7 @@ PRODUCT_PACKAGES += \
     android.hardware.camera.provider@2.4-impl \
     camera.device@1.0-impl \
     Camera2 \
+    camera.legacy.msm8960 \
     camera.msm8960 \
     libmmcamera_interface2
 
