@@ -33,6 +33,16 @@
 /* following code implement the contol logic of this class*/
 
 namespace android {
+namespace {
+
+// Keep obsolete Qualcomm extension IDs private to the legacy HAL.
+constexpr int32_t kCameraMsgStatsData = 0x1000;
+constexpr int32_t kCameraCmdHistogramOn = 20;
+constexpr int32_t kCameraCmdHistogramOff = 21;
+constexpr int32_t kCameraCmdHistogramSendData = 22;
+
+} // namespace
+
 static void HAL_event_cb(mm_camera_event_t *evt, void *user_data)
 {
   QCameraHardwareInterface *obj = (QCameraHardwareInterface *)user_data;
@@ -535,15 +545,15 @@ status_t QCameraHardwareInterface::sendCommand(int32_t command, int32_t arg1,
     Mutex::Autolock l(&mLock);
 
     switch (command) {
-        case CAMERA_CMD_HISTOGRAM_ON:
+        case kCameraCmdHistogramOn:
             ALOGE("histogram set to on");
             rc = setHistogram(1);
             break;
-        case CAMERA_CMD_HISTOGRAM_OFF:
+        case kCameraCmdHistogramOff:
             ALOGE("histogram set to off");
             rc = setHistogram(0);
             break;
-        case CAMERA_CMD_HISTOGRAM_SEND_DATA:
+        case kCameraCmdHistogramSendData:
             ALOGE("histogram send data");
             mSendData = true;
             rc = NO_ERROR;
@@ -915,14 +925,14 @@ void  QCameraHardwareInterface::processStatsEvent(
         case MM_CAMERA_STATS_EVT_HISTO:
         {
             ALOGE("HAL process Histo: mMsgEnabled=0x%x, mStatsOn=%d, mSendData=%d, mDataCb=%p ",
-            (mMsgEnabled & CAMERA_MSG_STATS_DATA), mStatsOn, mSendData, mDataCb);
+            (mMsgEnabled & kCameraMsgStatsData), mStatsOn, mSendData, mDataCb);
             int msgEnabled = mMsgEnabled;
             /*get stats buffer based on index*/
             camera_preview_histogram_info* hist_info =
                 (camera_preview_histogram_info*) mHistServer.camera_memory[event->e.stats_histo.index]->data;
 
             if(mStatsOn == QCAMERA_PARM_ENABLE && mSendData &&
-                            mDataCb && (msgEnabled & CAMERA_MSG_STATS_DATA) ) {
+                            mDataCb && (msgEnabled & kCameraMsgStatsData) ) {
                 uint32_t *dest;
                 mSendData = false;
                 mCurrentHisto = (mCurrentHisto + 1) % 3;
@@ -932,7 +942,7 @@ void  QCameraHardwareInterface::processStatsEvent(
                                                     (uint32_t *)hist_info->buffer,(sizeof(int32_t) * 256));
 
                 app_cb->dataCb  = mDataCb;
-                app_cb->argm_data_cb.msg_type = CAMERA_MSG_STATS_DATA;
+                app_cb->argm_data_cb.msg_type = kCameraMsgStatsData;
                 app_cb->argm_data_cb.data = mStatsMapped[mCurrentHisto];
                 app_cb->argm_data_cb.index = 0;
                 app_cb->argm_data_cb.metadata = NULL;
@@ -2095,6 +2105,7 @@ void QCameraHardwareInterface::roiEvent(fd_roi_t roi,app_notify_cb_t *app_cb)
 
     if(mStreamDisplay) mStreamDisplay->notifyROIEvent(roi);
 #if 0 //TODO: move to preview obj
+    constexpr int32_t kCameraMsgMetaData = 0x2000;
     mCallbackLock.lock();
     data_callback mcb = mDataCb;
     void *mdata = mCallbackCookie;
@@ -2127,8 +2138,8 @@ void QCameraHardwareInterface::roiEvent(fd_roi_t roi,app_notify_cb_t *app_cb)
             memcpy((uint32_t *)mMetaDataHeap->mHeap->base(), (uint32_t *)array, (sizeof(int)*(MAX_ROI*4+1)));
             mMetaDataWaitLock.unlock();
 
-            if  (mcb != NULL && (msgEnabled & CAMERA_MSG_META_DATA)) {
-                mcb(CAMERA_MSG_META_DATA, mMetaDataHeap->mBuffers[0], mdata);
+            if  (mcb != NULL && (msgEnabled & kCameraMsgMetaData)) {
+                mcb(kCameraMsgMetaData, mMetaDataHeap->mBuffers[0], mdata);
             }
         } else {
             mMetaDataWaitLock.unlock();

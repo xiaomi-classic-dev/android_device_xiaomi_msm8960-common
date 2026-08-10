@@ -130,14 +130,16 @@ ifeq ($(USE_DEVICE_SPECIFIC_CAMERA),true)
 
       LOCAL_PROPRIETARY_MODULE := true
       LOCAL_MODULE_RELATIVE_PATH := hw
-      LOCAL_MODULE:= camera.msm8960
+      LOCAL_MODULE:= camera.legacy.msm8960
       LOCAL_MODULE_TAGS := optional
       include $(BUILD_SHARED_LIBRARY)
+
+      include $(LOCAL_PATH1)/hal3on1/Android.mk
 
     endif # BUILD_TINY_ANDROID
 
 ifeq ($(V4L2_BASED_LIBCAM),true)
-include $(LOCAL_PATH)/mm-camera-interface/Android.mk
+include $(LOCAL_PATH1)/mm-camera-interface/Android.mk
 endif
 endif # USE_CAMERA_STUB
 endif
