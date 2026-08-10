@@ -27,6 +27,6 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := libaudioclient_shim.cpp
 LOCAL_MODULE := libaudioclient_shim
 LOCAL_MODULE_TAGS := optional
-LOCAL_SHARED_LIBRARIES := libaudioclient
+LOCAL_SHARED_LIBRARIES := libdl
 LOCAL_PROPRIETARY_MODULE := true
 include $(BUILD_SHARED_LIBRARY)

@@ -112,10 +112,10 @@ ifeq ($(USE_DEVICE_SPECIFIC_CAMERA),true)
       LOCAL_HEADER_LIBRARIES := libmedia_headers framework-permission-aidl-cpp
 
       ifeq ($(V4L2_BASED_LIBCAM),true)
-        LOCAL_SHARED_LIBRARIES:= libutils libui libcamera_client libcamera_metadata liblog libcutils
+        LOCAL_SHARED_LIBRARIES:= libutils libui libcamera_metadata liblog libcutils
         LOCAL_SHARED_LIBRARIES += libmmcamera_interface2
       else
-         LOCAL_SHARED_LIBRARIES:= libutils libui libcamera_client liblog libcamera_metadata libcutils libmmjpeg
+         LOCAL_SHARED_LIBRARIES:= libutils libui liblog libcamera_metadata libcutils libmmjpeg
       endif
 
       LOCAL_SHARED_LIBRARIES+= libgenlock libbinder libhardware libnativewindow
