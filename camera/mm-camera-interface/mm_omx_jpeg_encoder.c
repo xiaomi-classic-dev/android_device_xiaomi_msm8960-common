@@ -30,6 +30,8 @@
 #include <stdbool.h>
 #include <fcntl.h>
 #include <dlfcn.h>
+#include <stdlib.h>
+#include <string.h>
 #include "OMX_Types.h"
 #include "OMX_Index.h"
 #include "OMX_Core.h"
