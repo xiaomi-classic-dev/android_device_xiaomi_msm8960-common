@@ -10,6 +10,9 @@ LOCAL_SHARED_LIBRARIES := \
     libcutils \
     liblog
 
+LOCAL_HEADER_LIBRARIES := \
+    libhardware_headers
+
 LOCAL_SRC_FILES += \
     loc_log.cpp \
     loc_cfg.cpp \
@@ -41,5 +44,7 @@ include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libgps.utils_headers
+LOCAL_HEADER_LIBRARIES := libhardware_headers
+LOCAL_EXPORT_HEADER_LIBRARY_HEADERS := libhardware_headers
 LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH) $(LOCAL_PATH)/../platform_lib_abstractions
 include $(BUILD_HEADER_LIBRARY)
