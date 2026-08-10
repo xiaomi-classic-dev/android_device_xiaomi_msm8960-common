@@ -35,6 +35,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <poll.h>
+#include <stdio.h>
+#include <string.h>
 #include <time.h>
 #include <cutils/properties.h>
 
