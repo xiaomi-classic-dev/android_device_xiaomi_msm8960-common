@@ -65,9 +65,6 @@ QCOM_PROXY_DEVICE_ENABLED               := true
 TARGET_USES_QCOM_MM_AUDIO               := true
 TARGET_USES_QCOM_COMPRESSED_AUDIO       := true
 
-# Binder API version
-TARGET_USES_64_BIT_BINDER := true
-
 # Bionic
 TARGET_LD_SHIM_LIBS := \
     /vendor/bin/mpdecision|libshims_atomic.so \
