@@ -78,6 +78,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 # OpenGL
 PRODUCT_PROPERTY_OVERRIDES += \
+    ro.hardware.egl=adreno \
     ro.opengles.version=196608 \
     debug.egl.recordable.rgba8888=1
 
@@ -113,7 +114,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 # Media
 PRODUCT_PROPERTY_OVERRIDES += \
-    debug.stagefright.ccodec=0 \
+    debug.stagefright.ccodec=1 \
     media.stagefright.use-awesome=true
 
 PRODUCT_PROPERTY_OVERRIDES += \
