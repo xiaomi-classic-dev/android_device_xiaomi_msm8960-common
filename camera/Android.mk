@@ -107,7 +107,7 @@ ifeq ($(USE_DEVICE_SPECIFIC_CAMERA),true)
       LOCAL_C_INCLUDES+= $(call project-path-for,qcom-display)/libgenlock
       LOCAL_C_INCLUDES+= frameworks/native/include/media/hardware
       LOCAL_C_INCLUDES+= $(call project-path-for,qcom-media)/libstagefrighthw
-      LOCAL_HEADER_LIBRARIES := libmedia_headers framework-permission-aidl-cpp
+      LOCAL_HEADER_LIBRARIES := libaudiofoundation_headers libmedia_headers framework-permission-aidl-cpp
 
       ifeq ($(V4L2_BASED_LIBCAM),true)
         LOCAL_SHARED_LIBRARIES:= libutils libui libcamera_metadata liblog libcutils
@@ -123,7 +123,6 @@ ifeq ($(USE_DEVICE_SPECIFIC_CAMERA),true)
       else
         LOCAL_SHARED_LIBRARIES+= libdl
       endif
-      LOCAL_HEADER_LIBRARIES += libmedia_headers framework-permission-aidl-cpp
       LOCAL_STATIC_LIBRARIES += camera_parameters_xiaomi_msm8960 framework-permission-aidl-cpp
 
       LOCAL_CFLAGS += -include bionic/libc/include/sys/socket.h

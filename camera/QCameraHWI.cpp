@@ -335,7 +335,7 @@ QCameraHardwareInterface(int cameraId, int mode)
     mCameraState = CAMERA_STATE_READY;
     libdms = dlopen("libmorpho_moviesolid.so", RTLD_NOW);
     if (libdms) {
-        ALOGV("Open MM camera DL libmorpho_moviesolid loaded at %p & %p ", libdms);
+        ALOGV("Open MM camera DL libmorpho_moviesolid loaded at %p", libdms);
         *(void **)&LINK_morpho_MovieSolid_Init = dlsym(libdms, "MovieSolid_Init");
         *(void **)&LINK_morpho_MovieSolid_Function = dlsym(libdms, "MovieSolid_Function");
         *(void **)&LINK_morpho_MovieSolid_Finalize = dlsym(libdms, "MovieSolid_Finailze");
@@ -2554,7 +2554,7 @@ int QCameraHardwareInterface::cache_ops(int ion_fd,
   if (rc < 0)
     ALOGE("%s: Cache Invalidate failed\n", __func__);
   else
-    ALOGV("%s: Cache OPs type(%d) success", __func__);
+    ALOGV("%s: Cache OPs type(%d) success", __func__, type);
 
   return rc;
 }
