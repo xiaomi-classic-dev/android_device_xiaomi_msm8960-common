@@ -160,6 +160,7 @@ TARGET_KERNEL_ADDITIONAL_FLAGS      += HOSTLDFLAGS="-L/usr/lib/x86_64-linux-gnu 
 MALLOC_SVELTE := true
 
 # Partitions
+AB_OTA_UPDATER                       := false
 TARGET_USERIMAGES_USE_EXT4         := true
 TARGET_USERIMAGES_USE_F2FS         := true
 BOARD_BOOTIMAGE_PARTITION_SIZE     := 0x01E00000 # 44M
