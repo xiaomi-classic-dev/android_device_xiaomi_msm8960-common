@@ -68,13 +68,14 @@ TARGET_USES_QCOM_COMPRESSED_AUDIO       := true
 # Bionic
 TARGET_LD_SHIM_LIBS := \
     /vendor/bin/mpdecision|libshims_atomic.so \
-    /system/vendor/lib/libril-qc-qmi-1.so|libaudioclient_shim.so
+    /system/vendor/lib/libril-qc-qmi-1.so|libaudioclient_shim_msm8960.so
 
 # Bluetooth
 BLUETOOTH_HCI_USE_MCT                       := true
 BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := $(PLATFORM_PATH)/bluetooth
 BOARD_HAVE_BLUETOOTH                        := true
 BOARD_HAVE_BLUETOOTH_QCOM                   := true
+PRODUCT_SOONG_NAMESPACES                   += hardware/qcom-caf/bt/libbt-vendor
 
 # Camera
 BOARD_GLOBAL_CFLAGS                         += -DQCOM_BSP

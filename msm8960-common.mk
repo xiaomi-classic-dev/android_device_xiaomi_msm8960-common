@@ -229,7 +229,7 @@ PRODUCT_PACKAGES += \
 
 # Perf
 PRODUCT_PACKAGES += \
-    libaudioclient_shim \
+    libaudioclient_shim_msm8960 \
     libshims_atomic
 
 # Radio
