@@ -561,6 +561,12 @@ service sensors /vendor/bin/sensors.qcom
 on property:init.svc.sensors=running
     start qcamerasvr
 
+# The legacy camera provider probes the HAL only once when cameraserver starts.
+# sensors is a late_start service, so make cameraserver enumerate again after
+# mm-qcamera-daemon is ready instead of keeping the boot-time zero-camera result.
+on property:init.svc.qcamerasvr=running
+    restart cameraserver
+
 on property:ro.use_data_netmgrd=false
     # netmgr not supported on specific target
     stop netmgrd
@@ -653,7 +659,6 @@ service qcamerasvr /vendor/bin/mm-qcamera-daemon
     disabled
     user camera
     group camera system inet input graphics bluetooth
-    onrestart restart cameraserver
 
 service thermald /vendor/bin/thermald
    class main
