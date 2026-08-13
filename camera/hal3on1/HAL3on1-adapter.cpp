@@ -57,7 +57,6 @@ typedef struct {
     int buffer_size;
     size_t buffer_capacity;
     int video_buffer_size;
-    size_t video_buffer_capacity;
     int jpeg_size;
     uint8_t* buffer;
     uint8_t* video_buffer;
@@ -72,6 +71,7 @@ typedef struct {
     int preview_really_started;
     int preview_callbacks_enabled;
     preview_stream_ops* preview_window;
+    int accept_video_frames;
 } adapter_camera3_device_t;
 
 #define HAL1_CALL(hal1_device, func, ...) ({ \
@@ -184,6 +184,47 @@ camera_device_t* get_hal1_device(const struct camera3_device *device)
     return adapter_dev->hal1_device;
 }
 
+static uint8_t* take_pending_video_frame(adapter_camera3_device_t* adapter,
+                                         int* frame_size)
+{
+    if (frame_size)
+        *frame_size = 0;
+
+    Mutex::Autolock lock(callback_memory_lock);
+    uint8_t* frame = adapter->video_buffer;
+    const int size = __atomic_load_n(&adapter->video_buffer_size,
+                                     __ATOMIC_ACQUIRE);
+    if (!frame || size <= 0)
+        return nullptr;
+
+    if (frame_size)
+        *frame_size = size;
+    adapter->video_buffer = nullptr;
+    __atomic_store_n(&adapter->video_buffer_size, 0, __ATOMIC_RELEASE);
+    return frame;
+}
+
+static void release_pending_video_frame(adapter_camera3_device_t* adapter)
+{
+    uint8_t* frame = take_pending_video_frame(adapter, nullptr);
+    if (frame && adapter->hal1_device) {
+        HAL1_CALL(adapter->hal1_device, release_recording_frame, frame);
+    }
+}
+
+static void stop_video_stream(adapter_camera3_device_t* adapter)
+{
+    if (!adapter || !adapter->hal1_device || !adapter->video_stream)
+        return;
+
+    __atomic_store_n(&adapter->accept_video_frames, 0, __ATOMIC_RELEASE);
+    release_pending_video_frame(adapter);
+    HAL1_CALL(adapter->hal1_device, disable_msg_type,
+              CAMERA_MSG_VIDEO_FRAME);
+    HAL1_CALL(adapter->hal1_device, stop_recording);
+    adapter->video_stream = false;
+}
+
 void hal1_data_callback(int32_t msg_type,
                         const camera_memory_t *data, unsigned int index,
                         camera_frame_metadata_t *metadata, void *user)
@@ -266,42 +307,32 @@ void hal1_data_timestamp_callback(nsecs_t timestamp, int32_t msg_type,
         return;
 
     camera_device_t* hal1_device = static_cast<camera_device_t*>(user);
+    uint8_t* previous_frame = nullptr;
+    bool release_current_frame = false;
     {
         Mutex::Autolock lock(callback_memory_lock);
         adapter_camera3_device_t* adapter = hal3on1_dev;
         if (adapter &&
-            __atomic_load_n(&adapter->video_buffer_size,
-                            __ATOMIC_ACQUIRE) == 0) {
-            if (data->size > adapter->video_buffer_capacity) {
-                uint8_t* video_buffer =
-                    static_cast<uint8_t*>(realloc(adapter->video_buffer,
-                                                  data->size));
-                if (!video_buffer) {
-                    ALOGE("Failed to grow video buffer from %zu to %zu bytes",
-                          adapter->video_buffer_capacity, data->size);
-                } else {
-                    adapter->video_buffer = video_buffer;
-                    adapter->video_buffer_capacity = data->size;
-                }
-            }
-
-            if (data->size <= adapter->video_buffer_capacity) {
-                memcpy(adapter->video_buffer, data->data, data->size);
-                adapter->video_frame_timestamp = timestamp;
-                __atomic_store_n(&adapter->video_buffer_size, data->size,
-                                 __ATOMIC_RELEASE);
-            }
+            __atomic_load_n(&adapter->accept_video_frames,
+                            __ATOMIC_ACQUIRE)) {
+            previous_frame = adapter->video_buffer;
+            adapter->video_buffer = static_cast<uint8_t*>(data->data);
+            adapter->video_frame_timestamp = timestamp;
+            __atomic_store_n(&adapter->video_buffer_size, data->size,
+                             __ATOMIC_RELEASE);
+        } else {
+            release_current_frame = true;
         }
     }
 
     /*
-     * Never retain a HAL1 recording frame across Camera3 requests.  Some
-     * requests contain only a preview output; waiting for a later encoder
-     * request here would block the serialized preview callback and deadlock
-     * the request thread.  The adapter-owned copy remains valid until the
-     * encoder output consumes it.
+     * Keep at most the newest HAL1 recording frame.  The legacy HAL must not
+     * reuse the frame while it is copied into the Camera3 encoder buffer, but
+     * waiting in this callback would deadlock its serialized callback thread.
      */
-    if (hal1_device)
+    if (hal1_device && previous_frame)
+        HAL1_CALL(hal1_device, release_recording_frame, previous_frame);
+    if (hal1_device && release_current_frame)
         HAL1_CALL(hal1_device, release_recording_frame, data->data);
 }
 
@@ -439,14 +470,7 @@ static int camera3_close(hw_device_t *device)
         __atomic_store_n(&adapter_dev->jpeg_size, 0, __ATOMIC_RELEASE);
         __atomic_store_n(&adapter_dev->buffer_size, 0, __ATOMIC_RELEASE);
 
-        if (adapter_dev->video_stream) {
-            HAL1_CALL(adapter_dev->hal1_device, disable_msg_type,
-                      CAMERA_MSG_VIDEO_FRAME);
-            HAL1_CALL(adapter_dev->hal1_device, stop_recording);
-            adapter_dev->video_stream = false;
-        }
-        __atomic_store_n(&adapter_dev->video_buffer_size, 0,
-                         __ATOMIC_RELEASE);
+        stop_video_stream(adapter_dev);
         HAL1_CALL(adapter_dev->hal1_device, disable_msg_type,
                   CAMERA_MSG_COMPRESSED_IMAGE);
         HAL1_CALL(adapter_dev->hal1_device, cancel_picture);
@@ -459,7 +483,6 @@ static int camera3_close(hw_device_t *device)
         hal3on1_dev = nullptr;
         free(adapter_dev->preview_window);
         free(adapter_dev->buffer);
-        free(adapter_dev->video_buffer);
         free(adapter_dev->jpeg);
         free(adapter_dev);
     }
@@ -507,11 +530,7 @@ static int camera3_configure_streams(const struct camera3_device *dev, camera3_s
         return -ENODEV;
     }
 
-    if (adapter->video_stream) {
-        HAL1_CALL(hal1_device, disable_msg_type, CAMERA_MSG_VIDEO_FRAME);
-        HAL1_CALL(hal1_device, stop_recording);
-        adapter->video_stream = false;
-    }
+    stop_video_stream(adapter);
     set_preview_callbacks_enabled(adapter, false);
     if (HAL1_CALL(hal1_device, preview_enabled))
         HAL1_CALL(hal1_device, stop_preview);
@@ -525,8 +544,6 @@ static int camera3_configure_streams(const struct camera3_device *dev, camera3_s
     adapter->buffer_capacity = 0;
     free(adapter->buffer);
     adapter->buffer = nullptr;
-    adapter->video_buffer_capacity = 0;
-    free(adapter->video_buffer);
     adapter->video_buffer = nullptr;
     free(adapter->jpeg);
     adapter->jpeg = nullptr;
@@ -1599,22 +1616,61 @@ skip_mwb:
                 current_params.set("zsl", "on");
                 HAL1_CALL(hal1_device, set_parameters,
                           current_params.flatten());
+                __atomic_store_n(&adapter->accept_video_frames, 1,
+                                 __ATOMIC_RELEASE);
                 HAL1_CALL(hal1_device, enable_msg_type,
                           CAMERA_MSG_VIDEO_FRAME);
                 int ret = HAL1_CALL(hal1_device, start_recording);
-                if (ret != NO_ERROR)
+                if (ret != NO_ERROR) {
+                    __atomic_store_n(&adapter->accept_video_frames, 0,
+                                     __ATOMIC_RELEASE);
+                    HAL1_CALL(hal1_device, disable_msg_type,
+                              CAMERA_MSG_VIDEO_FRAME);
                     return ret;
+                }
                 adapter->video_stream = true;
             }
 
             if (!wait_for_nonzero(&adapter->video_buffer_size,
                                   "video callback"))
                 return -ETIMEDOUT;
-            payload_size = __atomic_load_n(&adapter->video_buffer_size,
-                                           __ATOMIC_ACQUIRE);
-            if (!adapter->video_buffer || payload_size <= 0 ||
-                payload_size > handle->size)
+            uint8_t* video_frame =
+                take_pending_video_frame(adapter, &payload_size);
+            if (!video_frame || payload_size <= 0 ||
+                payload_size > handle->size) {
+                if (video_frame)
+                    HAL1_CALL(hal1_device, release_recording_frame,
+                              video_frame);
                 return -EINVAL;
+            }
+
+            sp<Fence> acquire_fence = new Fence(output_buffer.acquire_fence);
+            e = acquire_fence->wait(1000);
+            if (e != NO_ERROR) {
+                HAL1_CALL(hal1_device, release_recording_frame, video_frame);
+                return e;
+            }
+
+            uint8_t* buf = nullptr;
+            e = GraphicBufferMapper::get().lock(
+                    *output_buffer.buffer,
+                    GRALLOC_USAGE_SW_WRITE_OFTEN |
+                            GRALLOC_USAGE_HW_VIDEO_ENCODER,
+                    rect, reinterpret_cast<void**>(&buf));
+            if (e != NO_ERROR || !buf) {
+                HAL1_CALL(hal1_device, release_recording_frame, video_frame);
+                return e != NO_ERROR ? e : -EINVAL;
+            }
+
+            memcpy(buf, video_frame, payload_size);
+            GraphicBufferMapper::get().unlock(*output_buffer.buffer);
+            HAL1_CALL(hal1_device, release_recording_frame, video_frame);
+
+            buffers.push_back(output_buffer);
+            buffers.editTop().acquire_fence = -1;
+            buffers.editTop().release_fence = -1;
+            buffers.editTop().status = CAMERA3_BUFFER_STATUS_OK;
+            continue;
         } else {
             if (!wait_for_nonzero(&adapter->buffer_size,
                                   "preview callback"))
@@ -1635,9 +1691,6 @@ skip_mwb:
             output_buffer.stream->format == HAL_PIXEL_FORMAT_YCrCb_420_SP) &&
             properties.use_hwcomposer)
             usage = GRALLOC_USAGE_HW_COMPOSER;
-
-        if (output_buffer.stream->format == HAL_PIXEL_FORMAT_NV12_ENCODEABLE)
-            usage = GRALLOC_USAGE_HW_VIDEO_ENCODER;
 
         e = GraphicBufferMapper::get().lock(*output_buffer.buffer, usage, rect,
                                             (void **)&buf);
@@ -1662,11 +1715,7 @@ skip_mwb:
             int crop_x, crop_y;
             yuv420sp_buffer *crop_buf = NULL;
 
-            if (output_buffer.stream->format == HAL_PIXEL_FORMAT_NV12_ENCODEABLE) {
-                memcpy(buf, adapter->video_buffer, payload_size);
-                __atomic_store_n(&adapter->video_buffer_size, 0,
-                                 __ATOMIC_RELEASE);
-            } else if (output_buffer.stream->width < adapter->stream_width ||
+            if (output_buffer.stream->width < adapter->stream_width ||
                        output_buffer.stream->height < adapter->stream_height) {
                 get_crop_point(adapter->stream_width, adapter->stream_height,
                     output_buffer.stream->width, output_buffer.stream->height, &crop_x, &crop_y);
@@ -1737,13 +1786,7 @@ static int camera3_flush(const struct camera3_device *dev)
     if (!adapter || !adapter->hal1_device)
         return -ENODEV;
 
-    if (adapter->video_stream) {
-        HAL1_CALL(adapter->hal1_device, disable_msg_type,
-                  CAMERA_MSG_VIDEO_FRAME);
-        HAL1_CALL(adapter->hal1_device, stop_recording);
-        adapter->video_stream = false;
-        __atomic_store_n(&adapter->video_buffer_size, 0, __ATOMIC_RELEASE);
-    }
+    stop_video_stream(adapter);
 
     HAL1_CALL(adapter->hal1_device, disable_msg_type,
               CAMERA_MSG_COMPRESSED_IMAGE);
