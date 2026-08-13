@@ -1,0 +1,19 @@
+# Android 15 no longer consumes TARGET_LD_SHIM_LIBS. Override the generic
+# service after rild.rc is parsed so the legacy Qualcomm RIL can resolve the
+# removed AudioSystem::setErrorCallback ABI from the device shim.
+service vendor.ril-daemon /vendor/bin/hw/rild
+    override
+    class main
+    user radio
+    group radio cache inet misc audio log readproc wakelock
+    capabilities BLOCK_SUSPEND NET_ADMIN NET_RAW
+    setenv LD_PRELOAD /vendor/lib/libaudioclient_shim_msm8960.so
+
+# Keep the legacy Qualcomm CPU hotplug daemon usable as well. Without this
+# override it exits every five seconds on Android 15 because the removed
+# libcutils atomic ABI is not provided to the proprietary executable.
+service mpdecision /vendor/bin/mpdecision --no_sleep --avg_comp
+    override
+    user root
+    disabled
+    setenv LD_PRELOAD /vendor/lib/libshims_atomic.so
