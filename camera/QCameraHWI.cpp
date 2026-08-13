@@ -20,11 +20,17 @@
 #define LOG_TAG "QCameraHWI"
 #include <utils/Log.h>
 #include <utils/threads.h>
+#include <aidl/android/hardware/power/IPower.h>
+#include <aidl/android/hardware/power/Mode.h>
+#include <android/binder_manager.h>
 #include <cutils/properties.h>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <string.h>
 #include <dlfcn.h>
+
+#include <memory>
+#include <string>
 
 #include "QCameraHAL.h"
 #include "QCameraHWI.h"
@@ -40,6 +46,33 @@ constexpr int32_t kCameraMsgStatsData = 0x1000;
 constexpr int32_t kCameraCmdHistogramOn = 20;
 constexpr int32_t kCameraCmdHistogramOff = 21;
 constexpr int32_t kCameraCmdHistogramSendData = 22;
+
+bool setCameraStreamingMode(bool enabled) {
+    using aidl::android::hardware::power::IPower;
+    using aidl::android::hardware::power::Mode;
+
+    static const std::string kInstance = std::string(IPower::descriptor) + "/default";
+    ndk::SpAIBinder binder(AServiceManager_checkService(kInstance.c_str()));
+    if (!binder.get()) {
+        ALOGW("Power AIDL service is unavailable");
+        return false;
+    }
+
+    std::shared_ptr<IPower> power = IPower::fromBinder(binder);
+    if (!power) {
+        ALOGW("Unable to connect to Power AIDL service");
+        return false;
+    }
+
+    const ndk::ScopedAStatus status = power->setMode(Mode::CAMERA_STREAMING_HIGH, enabled);
+    if (!status.isOk()) {
+        ALOGW("Unable to set camera streaming power mode: %s",
+                status.getDescription().c_str());
+        return false;
+    }
+
+    return true;
+}
 
 } // namespace
 
@@ -1400,7 +1433,7 @@ status_t QCameraHardwareInterface::startRecording()
             mCameraState = CAMERA_STATE_ERROR;
         mPreviewState = QCAMERA_HAL_RECORDING_STARTED;
 
-        if (mPowerModule) {
+        if (!setCameraStreamingMode(true) && mPowerModule) {
             if (mPowerModule->powerHint) {
                 mPowerModule->powerHint(mPowerModule,
                     POWER_HINT_VIDEO_ENCODE, (void *)"state=1");
@@ -1463,7 +1496,7 @@ void QCameraHardwareInterface::stopRecordingInternal()
     mCameraState = CAMERA_STATE_PREVIEW;  //TODO : Apurva : Hacked for 2nd time Recording
     mPreviewState = QCAMERA_HAL_PREVIEW_STARTED;
 
-    if (mPowerModule) {
+    if (!setCameraStreamingMode(false) && mPowerModule) {
         if (mPowerModule->powerHint) {
             mPowerModule->powerHint(mPowerModule,
                     POWER_HINT_VIDEO_ENCODE, (void *)"state=0");

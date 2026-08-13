@@ -50,6 +50,9 @@ TARGET_KRAIT_BIONIC_PLDSIZE          := 64
 QCOM_BOARD_PLATFORMS                    := msm8960
 TARGET_BOARD_PLATFORM                   := msm8960
 
+# Power
+TARGET_POWERHAL_MODE_EXT                := $(PLATFORM_PATH)/power/power-mode-ext.cpp
+
 # Audio
 USE_CUSTOM_AUDIO_POLICY := 1
 USE_XML_AUDIO_POLICY_CONF := 1
