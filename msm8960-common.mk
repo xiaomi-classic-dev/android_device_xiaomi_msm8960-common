@@ -244,7 +244,8 @@ PRODUCT_PACKAGES += \
 
 # Radio
 PRODUCT_PACKAGES += \
-    android.hardware.radio.config@1.0-service
+    android.hardware.radio.config@1.0-service \
+    zz-rild-shim.rc
 
 # Power
 ifneq ($(TARGET_PRODUCT),lineage_aries)
