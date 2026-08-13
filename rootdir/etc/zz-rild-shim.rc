@@ -9,9 +9,9 @@ service vendor.ril-daemon /vendor/bin/hw/rild
     capabilities BLOCK_SUSPEND NET_ADMIN NET_RAW
     setenv LD_PRELOAD /vendor/lib/libaudioclient_shim_msm8960.so
 
-# Keep the legacy Qualcomm CPU hotplug daemon usable as well. Without this
-# override it exits every five seconds on Android 15 because the removed
-# libcutils atomic ABI is not provided to the proprietary executable.
+# Retain the legacy Qualcomm CPU hotplug daemon for manual testing only.
+# Device power profiles keep this disabled; the override only supplies the
+# removed libcutils atomic ABI if it is started explicitly.
 service mpdecision /vendor/bin/mpdecision --no_sleep --avg_comp
     override
     user root

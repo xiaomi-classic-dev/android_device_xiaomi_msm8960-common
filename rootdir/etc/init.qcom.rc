@@ -273,6 +273,14 @@ on post-fs
     # Allow writing to the kernel trace log.
     chmod 0222 /sys/kernel/debug/tracing/trace_marker
 
+    # Keep compressed swap responsive on this 2 GiB device. The fixed
+    # 512 MiB logical size avoids the excessive 75% setting used by some msm8974
+    # devices while still relieving anonymous-memory pressure on Android 15.
+    write /sys/block/zram0/comp_algorithm lz4
+    write /proc/sys/vm/page-cluster 0
+    write /proc/sys/vm/swappiness 100
+    swapon_all /fstab.qcom
+
 # msm specific files that need to be created on /data
 on post-fs-data
    # Create directory for TZ Apps
@@ -727,7 +735,7 @@ service bdaddr /vendor/bin/bdaddr_xiaomi
 
 # Powersave
 on property:persist.sys.aries.power_profile=low
-    start mpdecision
+    stop mpdecision
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "powersave"
     write /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor "powersave"
     write /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor "powersave"
@@ -736,7 +744,7 @@ on property:persist.sys.aries.power_profile=low
 
 # Balanced
 on property:persist.sys.aries.power_profile=middle
-    start mpdecision
+    stop mpdecision
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "interactive"
     write /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor "interactive"
     write /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor "interactive"
