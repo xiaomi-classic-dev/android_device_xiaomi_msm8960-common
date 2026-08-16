@@ -18,11 +18,6 @@ LOCAL_CFLAGS+= -D_ANDROID_
 LOCAL_C_INCLUDES+= $(LOCAL_PATH)/..
 LOCAL_C_INCLUDES+= $(LOCAL_PATH)/../inc
 
-# Kernel headers
-LOCAL_C_INCLUDES += $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
-LOCAL_C_INCLUDES += $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include/media
-LOCAL_ADDITIONAL_DEPENDENCIES := $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
-
 LOCAL_C_INCLUDES+= $(call project-path-for,qcom-media)/mm-core/inc
 LOCAL_CFLAGS += -include bionic/libc/include/sys/socket.h
 LOCAL_CFLAGS += -include bionic/libc/include/sys/un.h
@@ -34,6 +29,7 @@ LOCAL_MODULE           := libmmcamera_interface2
 LOCAL_SHARED_LIBRARIES := libdl libcutils liblog
 LOCAL_HEADER_LIBRARIES += \
         camera_common_headers \
+        generated_kernel_headers \
         libutils_headers
 LOCAL_MODULE_TAGS := optional
 

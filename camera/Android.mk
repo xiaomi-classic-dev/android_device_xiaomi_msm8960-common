@@ -78,9 +78,6 @@ ifeq ($(USE_DEVICE_SPECIFIC_CAMERA),true)
 
       LOCAL_CFLAGS+= -DHW_ENCODE
 
-      LOCAL_C_INCLUDES+= $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
-      LOCAL_ADDITIONAL_DEPENDENCIES := $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
-
       # if debug service layer and up , use stub camera!
       LOCAL_C_INCLUDES += \
         frameworks/base/services/camera/libcameraservice #
@@ -107,7 +104,7 @@ ifeq ($(USE_DEVICE_SPECIFIC_CAMERA),true)
       LOCAL_C_INCLUDES+= $(call project-path-for,qcom-display)/libgenlock
       LOCAL_C_INCLUDES+= frameworks/native/include/media/hardware
       LOCAL_C_INCLUDES+= $(call project-path-for,qcom-media)/libstagefrighthw
-      LOCAL_HEADER_LIBRARIES := libaudiofoundation_headers libmedia_headers framework-permission-aidl-cpp
+      LOCAL_HEADER_LIBRARIES := camera_headers generated_kernel_headers libaudiofoundation_headers libmedia_headers framework-permission-aidl-cpp
 
       ifeq ($(V4L2_BASED_LIBCAM),true)
         LOCAL_SHARED_LIBRARIES:= libutils libui libcamera_metadata liblog libcutils
