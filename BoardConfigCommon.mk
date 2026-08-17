@@ -71,7 +71,7 @@ TARGET_USES_QCOM_COMPRESSED_AUDIO       := true
 # Bionic
 TARGET_LD_SHIM_LIBS := \
     /vendor/bin/mpdecision|libshims_atomic.so \
-    /system/vendor/lib/libril-qc-qmi-1.so|libaudioclient_shim_msm8960.so
+    /system/vendor/lib/libril-qc-qmi-1.so|libmedia.so
 
 # Bluetooth
 BLUETOOTH_HCI_USE_MCT                       := true

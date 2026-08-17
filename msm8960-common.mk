@@ -81,13 +81,18 @@ PRODUCT_PACKAGES += \
     android.hardware.audio@4.0-impl \
     android.hardware.audio.effect@4.0-impl \
     android.hardware.broadcastradio@1.0-impl \
-    android.hardware.soundtrigger@2.0-impl \
     audio.primary.msm8960 \
     audio.r_submix.default \
     audio.usb.default \
     libaudio-resampler \
     libqcomvoiceprocessing \
     tinymix
+
+# Legacy vendor blob dependencies
+PRODUCT_PACKAGES += \
+    libnetutils.vendor \
+    libstdc++_legacy_vendor_symlink \
+    libstdc++_vendor
 
 # Bluetooth
 PRODUCT_PACKAGES += \
@@ -230,6 +235,7 @@ PRODUCT_PACKAGES += \
 # Perf
 PRODUCT_PACKAGES += \
     libaudioclient_shim_msm8960 \
+    libmedia_legacy_msm8960 \
     libshims_atomic
 
 # Radio

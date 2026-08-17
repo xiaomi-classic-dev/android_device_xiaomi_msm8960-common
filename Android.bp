@@ -1,0 +1,18 @@
+install_symlink {
+    name: "libstdc++_legacy_vendor_symlink",
+    vendor: true,
+    installed_location: "lib/libstdc++.so",
+    symlink_target: "libstdc++_vendor.so",
+    required: ["libstdc++_vendor"],
+}
+
+cc_library_shared {
+    name: "libmedia_legacy_msm8960",
+    stem: "libmedia",
+    srcs: ["libshims/libaudioclient_shim.cpp"],
+    vendor: true,
+    shared_libs: [
+        "libdl",
+        "libutils",
+    ],
+}
