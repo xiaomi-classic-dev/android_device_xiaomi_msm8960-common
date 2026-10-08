@@ -66,7 +66,7 @@ esac
 
 case "$target" in
     "msm8960" )
-        start mpdecision
+        stop mpdecision
     ;;
 esac
 
