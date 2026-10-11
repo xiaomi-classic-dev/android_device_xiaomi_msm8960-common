@@ -19,11 +19,9 @@
 #include "Light.h"
 
 #include <android-base/file.h>
-#include <android-base/strings.h>
 #include <log/log.h>
 
 #include <array>
-#include <cstdlib>
 #include <string>
 #include <vector>
 #include <unistd.h>
@@ -53,30 +51,6 @@ constexpr std::array<const char*, 1> kWhiteBrightness = {
         "/sys/class/leds/white/brightness",
 };
 
-constexpr std::array<const char*, 2> kUsbOnline = {
-        "/sys/class/power_supply/usb/online",
-        "/sys/class/power_supply/ac/online",
-};
-constexpr std::array<const char*, 1> kDcOnline = {
-        "/sys/class/power_supply/pm8921-dc/online",
-};
-constexpr const char* kBatteryStatus = "/sys/class/power_supply/battery/status";
-constexpr const char* kBatteryCapacity = "/sys/class/power_supply/battery/capacity";
-constexpr uint32_t kBatteryFullColor = 0xff00ff00;
-
-bool parseInt(const std::string& data, int* value) {
-    const std::string trimmed = android::base::Trim(data);
-    char* end = nullptr;
-    const long parsed = std::strtol(trimmed.c_str(), &end, 10);
-
-    if (trimmed.empty() || end == nullptr || *end != '\0') {
-        return false;
-    }
-
-    *value = parsed;
-    return true;
-}
-
 template <size_t N>
 bool writeAny(const std::array<const char*, N>& paths, int value) {
     const std::string data = std::to_string(value) + "\n";
@@ -100,19 +74,6 @@ bool writeValue(const char* path, int value) {
 }
 
 template <size_t N>
-bool readAnyInt(const std::array<const char*, N>& paths, int* value) {
-    std::string data;
-
-    for (const char* path : paths) {
-        if (android::base::ReadFileToString(path, &data) && parseInt(data, value)) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-template <size_t N>
 bool nodeExists(const std::array<const char*, N>& paths) {
     for (const char* path : paths) {
         if (!access(path, F_OK)) {
@@ -131,37 +92,6 @@ uint32_t rgbToBrightness(const LightState& state) {
 
 bool isLit(const LightState& state) {
     return state.color & 0x00ffffff;
-}
-
-bool chargerOnline() {
-    int online = 0;
-    if (readAnyInt(kUsbOnline, &online) && online > 0) {
-        return true;
-    }
-    return readAnyInt(kDcOnline, &online) && online > 0;
-}
-
-bool batteryFull() {
-    std::string status;
-    if (android::base::ReadFileToString(kBatteryStatus, &status) &&
-        android::base::Trim(status) == "Full") {
-        return true;
-    }
-
-    int capacity = 0;
-    return android::base::ReadFileToString(kBatteryCapacity, &status) &&
-           parseInt(status, &capacity) && capacity >= 100;
-}
-
-LightState normalizeBatteryState(const LightState& state) {
-    if (isLit(state) || !chargerOnline() || !batteryFull()) {
-        return state;
-    }
-
-    LightState fullState = state;
-    fullState.color = kBatteryFullColor;
-    fullState.flashMode = Flash::NONE;
-    return fullState;
 }
 
 void setBacklight(const LightState& state) {
@@ -188,10 +118,8 @@ LightState gNotification;
 LightState gBattery;
 
 void updateNotificationLed() {
-    const LightState battery = normalizeBatteryState(gBattery);
-
-    if (isLit(battery)) {
-        setNotificationLed(battery);
+    if (isLit(gBattery)) {
+        setNotificationLed(gBattery);
     } else if (isLit(gAttention)) {
         setNotificationLed(gAttention);
     } else if (isLit(gNotification)) {
