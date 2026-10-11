@@ -85,7 +85,9 @@ ifeq ($(USE_DEVICE_SPECIFIC_CAMERA),true)
       LOCAL_C_INCLUDES += \
         frameworks/base/services/camera/libcameraservice #
 
-      LOCAL_SRC_FILES := $(MM_CAM_FILES) $(LOCAL_HAL_FILES)
+      LOCAL_SRC_FILES := $(MM_CAM_FILES) $(LOCAL_HAL_FILES) CameraParameters.cpp
+      LOCAL_C_INCLUDES += $(LOCAL_PATH)/../include
+      LOCAL_LDFLAGS += -Wl,-Bsymbolic
 
       ifeq ($(TARGET_BOARD_PLATFORM),msm7627a)
         LOCAL_CFLAGS+= -DNUM_PREVIEW_BUFFERS=6 -D_ANDROID_
