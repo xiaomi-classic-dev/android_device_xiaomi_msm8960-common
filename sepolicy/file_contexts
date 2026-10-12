@@ -5,4 +5,3 @@
 
 # GPU
 /dev/kgsl.*             u:object_r:gpu_device:s0
-/(vendor|system/vendor)/bin/hw/android\.hardware\.audio\.service\.msm8960    u:object_r:hal_audio_default_exec:s0
