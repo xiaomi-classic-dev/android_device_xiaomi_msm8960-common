@@ -50,6 +50,9 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.qc.sensors.wl_dis=true
 
 # BT
+PRODUCT_VENDOR_PROPERTIES += \
+    ro.hardware.audio.bluetooth=msm8960
+
 PRODUCT_SYSTEM_PROPERTIES += \
     bluetooth.profile.a2dp.source.enabled=true \
     bluetooth.profile.avrcp.target.enabled=true \
