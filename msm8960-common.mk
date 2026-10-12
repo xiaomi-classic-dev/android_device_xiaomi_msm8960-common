@@ -113,7 +113,8 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/component-overrides.xml:$(TARGET_COPY_OUT_VENDOR)/etc/sysconfig/component-overrides.xml
 
 # Cgroups
-ifeq ($(TARGET_DEVICE),aries)
+# TARGET_DEVICE is assigned after product inheritance; use the lunch product here.
+ifeq ($(TARGET_PRODUCT),lineage_aries)
 PRODUCT_COPY_FILES += \
     device/xiaomi/aries/configs/cgroups.json:$(TARGET_COPY_OUT_VENDOR)/etc/cgroups.json \
     device/xiaomi/aries/configs/task_profiles.json:$(TARGET_COPY_OUT_VENDOR)/etc/task_profiles.json
