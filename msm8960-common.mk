@@ -247,8 +247,10 @@ PRODUCT_PACKAGES += \
     android.hardware.radio.config@1.0-service
 
 # Power
+ifneq ($(TARGET_DEVICE),aries)
 PRODUCT_PACKAGES += \
     android.hardware.power-service-qti
+endif
 
 # Ramdisk
 PRODUCT_PACKAGES += \
