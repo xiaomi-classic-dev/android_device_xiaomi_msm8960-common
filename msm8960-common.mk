@@ -247,7 +247,7 @@ PRODUCT_PACKAGES += \
     android.hardware.radio.config@1.0-service
 
 # Power
-ifneq ($(TARGET_DEVICE),aries)
+ifneq ($(TARGET_PRODUCT),lineage_aries)
 PRODUCT_PACKAGES += \
     android.hardware.power-service-qti
 endif
