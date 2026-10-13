@@ -198,6 +198,8 @@
 /sys/devices/system/cpu/cpufreq ondemand/up_threshold_any_cpu_load   0664    system  system
 
 /sys/devices/system/cpu/cpufreq interactive/boostpulse  0664    system  system
+/sys/devices/system/cpu/cpufreq interactive/boostpulse_duration 0664 system system
+/sys/devices/system/cpu/cpufreq interactive/boost       0664    system  system
 /sys/devices/system/cpu/cpufreq interactive/timer_rate  0664    system  system
 /sys/devices/system/cpu/cpufreq interactive/min_sample_rate 0664    system  system
 /sys/devices/system/cpu/cpufreq interactive/min_sample_time 0664    system  system
