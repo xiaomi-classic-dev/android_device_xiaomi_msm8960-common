@@ -18,3 +18,15 @@ mode: 0771
 user: AID_SYSTEM
 group: AID_SYSTEM
 caps: 0
+
+[system/build.prop]
+mode: 0644
+user: AID_ROOT
+group: AID_ROOT
+caps: 0
+
+[vendor/build.prop]
+mode: 0644
+user: AID_ROOT
+group: AID_ROOT
+caps: 0
