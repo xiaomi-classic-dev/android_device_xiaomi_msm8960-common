@@ -25,6 +25,14 @@ user: AID_ROOT
 group: AID_ROOT
 caps: 0
 
+# Embedded partition files are built as part of system on this non-Treble
+# device. Keep their override in the system fs_config table as well.
+[system/*/build.prop]
+mode: 0644
+user: AID_ROOT
+group: AID_ROOT
+caps: 0
+
 [vendor/build.prop]
 mode: 0644
 user: AID_ROOT
