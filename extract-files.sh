@@ -57,6 +57,12 @@ setup_vendor "$DEVICE_COMMON" "$VENDOR" "$MK_ROOT" true "$CLEAN_VENDOR"
 
 extract "$MY_DIR"/common-proprietary-files.txt "$SRC" "$SECTION"
 
+# Reapply the firmware-specific exit cleanup correction after extraction.
+NETMGRD_BLOB="$MK_ROOT/vendor/$VENDOR/$DEVICE_COMMON/proprietary/vendor/bin/netmgrd"
+if [ -f "$NETMGRD_BLOB" ]; then
+    python3 "$MY_DIR/fixups/netmgrd-cleanup.py" "$NETMGRD_BLOB"
+fi
+
 # Reinitialize the helper for device
 setup_vendor "$DEVICE" "$VENDOR" "$MK_ROOT" false "$CLEAN_VENDOR"
 
