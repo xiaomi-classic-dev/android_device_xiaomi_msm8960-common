@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+#define _GNU_SOURCE
 #define LOG_TAG "bdaddr_xiaomi"
 #include <log/log.h>
 
