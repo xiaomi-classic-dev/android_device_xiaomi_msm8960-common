@@ -127,6 +127,9 @@ static bool decode_dms(const uint8_t *response, size_t size,
         if (length > size - offset)
             return false;
         if (type == 0x02) {
+            if (length == 4 && (le16(response + offset) || le16(response + offset + 2)))
+                ALOGW("DMS MAC query returned result %u, error %u",
+                      le16(response + offset), le16(response + offset + 2));
             if (success || length != 4 || le16(response + offset) ||
                 le16(response + offset + 2))
                 return false;
@@ -231,9 +234,26 @@ int main(int argc, char **argv)
     if (!probe && saved_address())
         return 0;
     signal(SIGALRM, timed_out);
-    alarm(25);
+    alarm(35);
     uint8_t address[MAC_ADDR_SIZE];
-    if (!read_legacy(address) && !read_dms(address))
+    bool found = read_legacy(address);
+    if (found)
+        ALOGI("Read the factory Bluetooth address using Xiaomi NV");
+    if (!found) {
+        found = read_dms(address);
+        if (found)
+            ALOGI("Read the factory Bluetooth address using DMS");
+    }
+    /* Early QMUX clients can remain stuck after the modem becomes ready.
+     * Each attempt must exec a fresh client with its own bounded lifetime. */
+    for (int attempt = 0; !found && attempt < 3; ++attempt) {
+        ALOGI("Retrying Xiaomi NV with a fresh client after modem startup");
+        usleep(250000);
+        found = read_legacy(address);
+        if (found)
+            ALOGI("Read the factory Bluetooth address using Xiaomi NV retry");
+    }
+    if (!found)
         return 1;
     alarm(0);
     char text[18];
