@@ -37,9 +37,6 @@
 #define BD_ADDR_FILE "/data/misc/bluetooth/bdaddr"
 #define MAC_ADDR_SIZE 6
 
-/* Public QCCI service-info ABI used by the packaged 32-bit CCI library. */
-struct qmi_service_info { unsigned int info[5]; };
-
 static bool valid_address(const uint8_t address[MAC_ADDR_SIZE])
 {
     static const uint8_t zero[MAC_ADDR_SIZE] = {0};
@@ -108,98 +105,6 @@ static bool read_legacy(uint8_t address[MAC_ADDR_SIZE])
             valid_address(address);
 }
 
-static unsigned int le16(const uint8_t *value)
-{
-    return value[0] | ((unsigned int)value[1] << 8);
-}
-
-/* QMI DMS Get MAC Address (0x005c): result TLV and length-prefixed MAC TLV. */
-static bool decode_dms(const uint8_t *response, size_t size,
-                       uint8_t address[MAC_ADDR_SIZE])
-{
-    bool success = false, found = false;
-    for (size_t offset = 0; offset < size;) {
-        if (size - offset < 3)
-            return false;
-        uint8_t type = response[offset];
-        size_t length = le16(response + offset + 1);
-        offset += 3;
-        if (length > size - offset)
-            return false;
-        if (type == 0x02) {
-            if (length == 4 && (le16(response + offset) || le16(response + offset + 2)))
-                ALOGW("DMS MAC query returned result %u, error %u",
-                      le16(response + offset), le16(response + offset + 2));
-            if (success || length != 4 || le16(response + offset) ||
-                le16(response + offset + 2))
-                return false;
-            success = true;
-        } else if (type == 0x10) {
-            if (found || length != MAC_ADDR_SIZE + 1 || response[offset] != MAC_ADDR_SIZE)
-                return false;
-            memcpy(address, response + offset + 1, MAC_ADDR_SIZE);
-            found = true;
-        }
-        offset += length;
-    }
-    return success && found && valid_address(address);
-}
-
-static bool read_dms(uint8_t address[MAC_ADDR_SIZE])
-{
-    void *services = dlopen("libqmiservices.so", RTLD_NOW);
-    void *cci = dlopen("libqmi_cci.so", RTLD_NOW);
-    void *(*get_object)(int, int, int) = services ?
-            dlsym(services, "dms_get_service_object_internal_v01") : NULL;
-    int (*get_list)(void *, struct qmi_service_info *, unsigned int *, unsigned int *) =
-            cci ? dlsym(cci, "qmi_client_get_service_list") : NULL;
-    int (*client_init)(struct qmi_service_info *, void *, void *, void *, void *, void **) =
-            cci ? dlsym(cci, "qmi_client_init") : NULL;
-    int (*send_raw)(void *, unsigned int, void *, unsigned int, void *, unsigned int,
-                    unsigned int *, unsigned int) =
-            cci ? dlsym(cci, "qmi_client_send_raw_msg_sync") : NULL;
-    int (*release)(void *) = cci ? dlsym(cci, "qmi_client_release") : NULL;
-    if (!get_object || !get_list || !client_init || !send_raw || !release) {
-        ALOGE("Cannot resolve the packaged DMS/QCCI entry points");
-        return false;
-    }
-    /* Versions exported by the Aries vendor DMS IDL object. */
-    void *object = get_object(1, 0x23, 6);
-    if (!object)
-        return false;
-    struct qmi_service_info service = {0};
-    bool available = false;
-    for (int i = 0; i < 40; ++i) {
-        unsigned int entries = 1, total = 0;
-        if (!get_list(object, &service, &entries, &total) && entries && total) {
-            available = true;
-            break;
-        }
-        usleep(250000);
-    }
-    if (!available) {
-        ALOGE("DMS service did not become available");
-        return false;
-    }
-    void *client = NULL;
-    if (client_init(&service, object, NULL, NULL, NULL, &client)) {
-        ALOGE("Cannot initialize the DMS client");
-        return false;
-    }
-    /* Device TLV: uint32 QMI_DMS_MAC_TYPE_BLUETOOTH (1). This is read-only. */
-    uint8_t request[] = {0x01, 4, 0, 1, 0, 0, 0};
-    uint8_t response[256] = {0};
-    unsigned int received = 0;
-    int error = send_raw(client, 0x005c, request, sizeof(request), response,
-                         sizeof(response), &received, 2000);
-    bool ok = !error && received <= sizeof(response) &&
-            decode_dms(response, received, address);
-    release(client);
-    if (!ok)
-        ALOGE("DMS did not return a valid factory Bluetooth address: %d", error);
-    return ok;
-}
-
 static bool saved_address(void)
 {
     char text[19] = {0};
@@ -236,25 +141,21 @@ int main(int argc, char **argv)
     signal(SIGALRM, timed_out);
     alarm(35);
     uint8_t address[MAC_ADDR_SIZE];
-    bool found = read_legacy(address);
-    if (found)
-        ALOGI("Read the factory Bluetooth address using Xiaomi NV");
-    if (!found) {
-        found = read_dms(address);
-        if (found)
-            ALOGI("Read the factory Bluetooth address using DMS");
-    }
+    bool found = false;
     /* Early QMUX clients can remain stuck after the modem becomes ready.
      * Each attempt must exec a fresh client with its own bounded lifetime. */
-    for (int attempt = 0; !found && attempt < 3; ++attempt) {
-        ALOGI("Retrying Xiaomi NV with a fresh client after modem startup");
-        usleep(250000);
+    for (int attempt = 0; !found && attempt < 6; ++attempt) {
+        if (attempt) {
+            ALOGI("Retrying Xiaomi NV with a fresh client after modem startup");
+            usleep(250000);
+        }
         found = read_legacy(address);
-        if (found)
-            ALOGI("Read the factory Bluetooth address using Xiaomi NV retry");
     }
-    if (!found)
+    if (!found) {
+        ALOGE("Cannot read the factory Bluetooth address after bounded NV attempts");
         return 1;
+    }
+    ALOGI("Read the factory Bluetooth address using Xiaomi NV");
     alarm(0);
     char text[18];
     snprintf(text, sizeof(text), "%02X:%02X:%02X:%02X:%02X:%02X", address[0],

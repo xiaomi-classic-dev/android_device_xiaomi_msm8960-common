@@ -724,8 +724,13 @@ service wcnss-service /vendor/bin/wcnss_service
     group system wifi radio
     oneshot
 
+# The QMI NV client needs the QMUX transport before its first connection.
+on property:init.svc.qmuxd=running
+    start bdaddr
+
 service bdaddr /vendor/bin/bdaddr_xiaomi
-    class core
+    class main
+    disabled
     user root
     group system
     oneshot
