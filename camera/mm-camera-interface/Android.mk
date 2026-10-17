@@ -19,7 +19,8 @@ LOCAL_C_INCLUDES+= $(LOCAL_PATH)/..
 LOCAL_C_INCLUDES+= $(LOCAL_PATH)/../inc
 
 # Kernel headers
-LOCAL_C_INCLUDES += $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
+# Use Bionic's scrubbed UAPI first, then the device's private camera/ION headers.
+LOCAL_CFLAGS += -idirafter $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
 LOCAL_C_INCLUDES += $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include/media
 LOCAL_ADDITIONAL_DEPENDENCIES := $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
 

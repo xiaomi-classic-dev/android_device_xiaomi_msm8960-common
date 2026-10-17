@@ -78,7 +78,8 @@ ifeq ($(USE_DEVICE_SPECIFIC_CAMERA),true)
 
       LOCAL_CFLAGS+= -DHW_ENCODE
 
-      LOCAL_C_INCLUDES+= $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
+      # Use Bionic's scrubbed UAPI first, then the device's private camera/ION headers.
+      LOCAL_CFLAGS += -idirafter $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
       LOCAL_ADDITIONAL_DEPENDENCIES := $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
 
       # if debug service layer and up , use stub camera!
