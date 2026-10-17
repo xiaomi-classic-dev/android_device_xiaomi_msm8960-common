@@ -63,6 +63,11 @@ if [ -f "$NETMGRD_BLOB" ]; then
     python3 "$MY_DIR/fixups/netmgrd-cleanup.py" "$NETMGRD_BLOB"
 fi
 
+WIDEVINE_BLOB="$MK_ROOT/vendor/$VENDOR/$DEVICE_COMMON/proprietary/vendor/lib/mediadrm/libwvdrmengine.so"
+if [ -f "$WIDEVINE_BLOB" ]; then
+    python3 "$MY_DIR/fixups/widevine-protobuf.py" "$WIDEVINE_BLOB" --patchelf "${PATCHELF:-patchelf}"
+fi
+
 # Reinitialize the helper for device
 setup_vendor "$DEVICE" "$VENDOR" "$MK_ROOT" false "$CLEAN_VENDOR"
 

@@ -245,10 +245,9 @@ PRODUCT_PACKAGES += \
     libaudioclient_shim_msm8960 \
     libshims_atomic
 
-# The legacy Widevine plugin uses the protobuf ABI shipped in the VNDK v29
-# compatibility library. Keep it in vendor so platform users retain their ABI.
+# Use the versioned ABI: non-Treble processes already load platform protobuf.
 PRODUCT_PACKAGES += \
-    libprotobuf-cpp-lite-vendorcompat
+    libprotobuf-cpp-lite-v29
 
 # Radio
 PRODUCT_PACKAGES += \
