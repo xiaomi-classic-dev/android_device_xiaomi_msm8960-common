@@ -1,48 +1,20 @@
-/*
- * Copyright (C) 2026 The LineageOS Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-#define LOG_TAG "android.hardware.light@2.0-service.msm8960"
-
+// SPDX-License-Identifier: Apache-2.0
 #include "Light.h"
-
-#include <hidl/HidlTransportSupport.h>
+#include <android/binder_manager.h>
+#include <android/binder_process.h>
 #include <log/log.h>
-
-using android::OK;
-using android::sp;
-using android::status_t;
-using android::hardware::configureRpcThreadpool;
-using android::hardware::joinRpcThreadpool;
-using android::hardware::light::V2_0::ILight;
-using android::hardware::light::V2_0::implementation::Light;
+#include <string>
 
 int main() {
-    sp<ILight> service = new Light();
-
-    configureRpcThreadpool(1, true);
-
-    status_t status = service->registerAsService();
-    if (status != OK) {
-        ALOGE("Cannot register Light HAL service");
+    using aidl::android::hardware::light::ILights;
+    using aidl::android::hardware::light::implementation::Light;
+    ABinderProcess_setThreadPoolMaxThreadCount(0);
+    auto service = ndk::SharedRefBase::make<Light>();
+    const std::string instance = std::string(ILights::descriptor) + "/default";
+    if (AServiceManager_addService(service->asBinder().get(), instance.c_str()) != STATUS_OK) {
+        ALOGE("Cannot register MSM8960 Light HAL service");
         return 1;
     }
-
-    ALOGI("Light HAL service ready");
-    joinRpcThreadpool();
-
-    ALOGE("Light HAL service failed to join threadpool");
+    ABinderProcess_joinThreadPool();
     return 1;
 }

@@ -5,3 +5,6 @@
 
 # GPU
 /dev/kgsl.*             u:object_r:gpu_device:s0
+
+# Android 17 AIDL light service; preserve the existing light HAL domain.
+/(vendor|system/vendor)/bin/hw/android\.hardware\.light-service\.msm8960    u:object_r:hal_light_default_exec:s0

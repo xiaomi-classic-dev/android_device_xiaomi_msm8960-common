@@ -139,10 +139,8 @@ PRODUCT_PACKAGES += \
     android.hardware.graphics.allocator@2.0-impl \
     android.hardware.graphics.allocator@2.0-service \
     android.hardware.graphics.composer@2.1-service \
-    android.hardware.configstore@1.1-service \
     android.hardware.graphics.mapper@2.0-impl-2.1 \
-    android.hardware.memtrack@1.0-impl \
-    android.hardware.memtrack@1.0-service \
+    android.hardware.memtrack-service.legacy \
     libgenlock \
     libmemalloc \
     liboverlay \
@@ -212,7 +210,7 @@ PRODUCT_PACKAGES += \
 
 # Lights
 PRODUCT_PACKAGES += \
-    android.hardware.light@2.0-service.msm8960
+    android.hardware.light-service.msm8960
 
 # Media
 PRODUCT_COPY_FILES += \
@@ -338,3 +336,6 @@ $(call inherit-product, vendor/xiaomi/msm8960-common/msm8960-common-vendor.mk)
 
 # Backend for the Lineage AIDL timed-output adapter.
 PRODUCT_PACKAGES += vibrator.default
+
+# Retain the framework matrix matching the existing device FCM level.
+PRODUCT_PACKAGES += framework_compatibility_matrix.6.xml

@@ -16,30 +16,20 @@
 
 #pragma once
 
-#include <android/hardware/light/2.0/ILight.h>
-
+#include <aidl/android/hardware/light/BnLights.h>
 #include <mutex>
+#include <vector>
 
-namespace android {
-namespace hardware {
-namespace light {
-namespace V2_0 {
-namespace implementation {
+namespace aidl::android::hardware::light::implementation {
+using LightState = HwLightState;
+using Type = LightType;
 
-using ::android::hardware::Return;
-using ::android::hardware::Void;
-
-class Light : public ILight {
+class Light : public BnLights {
   public:
-    Return<Status> setLight(Type type, const LightState& state) override;
-    Return<void> getSupportedTypes(getSupportedTypes_cb hidl_cb) override;
+    ndk::ScopedAStatus setLightState(int32_t id, const HwLightState& state) override;
+    ndk::ScopedAStatus getLights(std::vector<HwLight>* lights) override;
 
   private:
     std::mutex mLock;
 };
-
-}  // namespace implementation
-}  // namespace V2_0
-}  // namespace light
-}  // namespace hardware
-}  // namespace android
+}  // namespace aidl::android::hardware::light::implementation

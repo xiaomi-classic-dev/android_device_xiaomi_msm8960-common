@@ -14,19 +14,19 @@
 // limitations under the License.
 
 cc_binary {
-    name: "android.hardware.light@2.0-service.msm8960",
+    name: "android.hardware.light-service.msm8960",
     relative_install_path: "hw",
-    defaults: ["hidl_defaults"],
     proprietary: true,
-    init_rc: ["android.hardware.light@2.0-service.msm8960.rc"],
+    init_rc: ["android.hardware.light-service.msm8960.rc"],
+    vintf_fragments: ["light-msm8960.xml"],
     srcs: [
         "Light.cpp",
         "service.cpp",
     ],
     shared_libs: [
-        "android.hardware.light@2.0",
+        "android.hardware.light-V2-ndk",
         "libbase",
-        "libhidlbase",
+        "libbinder_ndk",
         "liblog",
         "libutils",
     ],
