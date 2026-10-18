@@ -102,6 +102,8 @@ TARGET_DISABLE_POSTRENDER_CLEANUP := true
 TARGET_USES_C2D_COMPOSITION     := true
 TARGET_USES_EGL_DISPLAY_ARRAY   := true
 TARGET_USES_ION                 := true
+# Android17 requires an explicit opt-in to the existing mapper2 backend.
+$(call soong_config_set_bool,libui,legacy_gralloc,true)
 
 # Extended filesystem support
 TARGET_EXFAT_DRIVER := sdfat
