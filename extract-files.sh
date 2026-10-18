@@ -57,6 +57,13 @@ setup_vendor "$DEVICE_COMMON" "$VENDOR" "$MK_ROOT" true "$CLEAN_VENDOR"
 
 extract "$MY_DIR"/common-proprietary-files.txt "$SRC" "$SECTION"
 
+# AudioSystem moved out of libmedia; preserve the callback ABI preload shim.
+RIL_BLOB="$MK_ROOT/vendor/$VENDOR/$DEVICE_COMMON/proprietary/vendor/lib/libril-qc-qmi-1.so"
+if [ -f "$RIL_BLOB" ]; then
+    python3 "$MY_DIR/fixups/ril-audio-dependency.py" "$RIL_BLOB" \
+        --patchelf "$MK_ROOT/prebuilts/extract-tools/linux-x86/bin/patchelf-0_18"
+fi
+
 # Reapply the firmware-specific exit cleanup correction after extraction.
 NETMGRD_BLOB="$MK_ROOT/vendor/$VENDOR/$DEVICE_COMMON/proprietary/vendor/bin/netmgrd"
 if [ -f "$NETMGRD_BLOB" ]; then

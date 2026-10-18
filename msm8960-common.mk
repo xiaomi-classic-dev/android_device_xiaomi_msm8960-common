@@ -66,6 +66,11 @@ PRODUCT_COPY_FILES += \
 # Filesystem permission overrides for the vendor files embedded in system.
 PRODUCT_PACKAGES += fs_config_files_vendor
 
+# Proprietary services retain these pre-Treble runtime dependencies.
+PRODUCT_PACKAGES += \
+    msm8960_libstdcxx_vendor_link \
+    libnetutils.vendor
+
 # Audio
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/audio/audio_effects.xml:$(TARGET_COPY_OUT_VENDOR)/etc/audio_effects.xml \

@@ -1,0 +1,8 @@
+// Legacy Qualcomm executables request the original bionic C++ ABI soname.
+install_symlink {
+    name: "msm8960_libstdcxx_vendor_link",
+    soc_specific: true,
+    installed_location: "lib/libstdc++.so",
+    symlink_target: "libstdc++_vendor.so",
+    required: ["libstdc++_vendor"],
+}
