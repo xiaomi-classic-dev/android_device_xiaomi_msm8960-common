@@ -56,6 +56,10 @@ init_DMM()
     esac
 
     mem="/sys/devices/system/memory"
+    if [ ! -r "$mem/movable_start_bytes" ] || [ ! -r "$mem/block_size_bytes" ]; then
+        log -p i -t DMM "Memory hotplug interface unavailable"
+        return 0
+    fi
     op=`cat $mem/movable_start_bytes`
     case "$op" in
     "0")
