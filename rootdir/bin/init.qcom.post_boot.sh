@@ -27,24 +27,34 @@
 #
 
 target=`getprop ro.board.platform`
+result=0
 
-chown -h system /sys/devices/system/cpu/cpufreq/ondemand/sampling_rate
-chown -h system /sys/devices/system/cpu/cpufreq/ondemand/sampling_down_factor
-chown -h system /sys/devices/system/cpu/cpufreq/ondemand/io_is_busy
+for node in sampling_rate sampling_down_factor io_is_busy; do
+    path=/sys/devices/system/cpu/cpufreq/ondemand/$node
+    if [ -e "$path" ]; then
+        chown -h system "$path" || result=1
+    fi
+done
 
 emmc_boot=`getprop ro.boot.emmc`
 case "$emmc_boot"
     in "true")
-        chown -h system /sys/devices/platform/rs300000a7.65536/force_sync
-        chown -h system /sys/devices/platform/rs300000a7.65536/sync_sts
-        chown -h system /sys/devices/platform/rs300100a7.65536/force_sync
-        chown -h system /sys/devices/platform/rs300100a7.65536/sync_sts
+        for controller in rs300000a7.65536 rs300100a7.65536; do
+            for node in force_sync sync_sts; do
+                path=/sys/devices/platform/$controller/$node
+                if [ -e "$path" ]; then
+                    chown -h system "$path" || result=1
+                fi
+            done
+        done
     ;;
 esac
 
 case "$target" in
     "msm8960" )
-        echo 10 > /sys/devices/platform/msm_sdcc.3/idle_timeout
+        if [ -e /sys/devices/platform/msm_sdcc.3/idle_timeout ]; then
+            echo 10 > /sys/devices/platform/msm_sdcc.3/idle_timeout || result=1
+        fi
         ;;
 esac
 
@@ -54,11 +64,11 @@ case "$target" in
         soc_id=`cat /sys/devices/system/soc/soc0/id`
         case "$soc_id" in
              "153") #8064 v2
-                 start thermal-engine
+                 start thermal-engine || result=1
              ;;
 
 	     *) #all targets except 8064 v2
-		 start thermald
+		 start thermald || result=1
 	     ;;
         esac
     ;;
@@ -66,12 +76,17 @@ esac
 
 case "$target" in
     "msm8960" )
-        stop mpdecision
+        stop mpdecision || result=1
     ;;
 esac
 
 
-#fastrpc permission setting
-insmod /system/lib/modules/adsprpc.ko
-chown -h system.system /dev/adsprpc-smd
-chmod -h 666 /dev/adsprpc-smd
+# The Aries kernel builds FastRPC in. Other msm8960 variants may ship a module.
+if [ ! -e /dev/adsprpc-smd ] && [ -f /vendor/lib/modules/adsprpc.ko ]; then
+    insmod /vendor/lib/modules/adsprpc.ko || result=1
+fi
+if [ -e /dev/adsprpc-smd ]; then
+    chown -h system:system /dev/adsprpc-smd || result=1
+    chmod 666 /dev/adsprpc-smd || result=1
+fi
+exit "$result"
